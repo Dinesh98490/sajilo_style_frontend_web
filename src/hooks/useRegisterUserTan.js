@@ -14,7 +14,7 @@ export  const useRegisterUserTan = () => {
             mutationKey: ['register'], //key for this hook
             onSuccess: (date) => {
                 toast.success(data.message || "Registration Successfull")
-                navigate('/login')
+                navigate('/')  // after the register success, naviagte to the landing page
             },
             onError: (err) => {
                 toast.error(err.message || "Registration Failed")
