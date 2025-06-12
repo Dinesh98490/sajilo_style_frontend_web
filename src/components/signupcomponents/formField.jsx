@@ -26,7 +26,6 @@ export function FormFields() {
     e.preventDefault()
     mutate(form, {
       onSuccess: () => {
-        toast.success("Registration successful")
         setForm({
           fullName: '',
           email: '',

@@ -4,7 +4,7 @@ export const registerUserService = async (formData) => {
     try{
         const response = await registerUserApi(formData)
         console.log(response.data)
-        return response.data // body of response
+        return response.data 
     }catch(err){
         throw err.response?.data || {message: "Registration Failed"}
     }

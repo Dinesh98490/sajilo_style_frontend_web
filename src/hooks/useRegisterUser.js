@@ -8,9 +8,9 @@ export const useRegisterUser = () => {
 
 
     const register = async (formData) => {
-        // when user click an event/button
+        
         setIsLoading(true)
-        setError(null) // clear state
+        setError(null) 
         setData(null) // clear state
 
         try{

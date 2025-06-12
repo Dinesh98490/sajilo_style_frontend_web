@@ -4,15 +4,17 @@ import {useMutation} from "@tanstack/react-query";
 
 import { registerUserService } from "../services/authService";
 import { toast } from "react-toastify";
-import { data } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 
 export  const useRegisterUserTan = () => {
+    const navigate=useNavigate()
     return useMutation(
         {
             mutationFn: registerUserService,// which functions to run 
             mutationKey: ['register'], //key for this hook
             onSuccess: (date) => {
                 toast.success(data.message || "Registration Successfull")
+                navigate('/login')
             },
             onError: (err) => {
                 toast.error(err.message || "Registration Failed")
