@@ -3,7 +3,10 @@ import { Search, Heart, ShoppingBag, Menu } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { IMAGE_PATHS } from "../../common/imageConstant";
 
+
+
 export default function Navbar() {
+  
   const authnavigate = useNavigate();
 
   return (
@@ -67,6 +70,8 @@ export default function Navbar() {
           <span className="sr-only">Cart</span>
         </Link>
 
+
+        { /*  navigate code for the login and signup in the navbar*/ }
         <button
           className="text-gray-800 border border-gray-400 hover:bg-orange-500 hover:text-white px-4 py-2 text-sm font-medium rounded-full transition-colors"
           onClick={() => authnavigate('/signup')}
