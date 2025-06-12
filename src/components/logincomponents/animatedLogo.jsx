@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { IMAGE_PATHS } from "../../common/imageConstant"; 
 
+//animated logo for the image
 export function AnimatedLogo() {
   return (
     <motion.div
