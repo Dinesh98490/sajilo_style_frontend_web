@@ -1,9 +1,10 @@
 import React from "react";
 import { Search, Heart, ShoppingBag, Menu } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { IMAGE_PATHS } from "../../common/imageConstant";
 
 export default function Navbar() {
+  const navigate = useNavigate();
   return (
     <header className="flex h-16 w-full items-center justify-between border-b bg-[#FAFAFA] px-4 md:px-6">
       
@@ -79,11 +80,11 @@ export default function Navbar() {
           <span className="sr-only">Shopping cart</span>
         </Link>
 
-        <button className="text-gray-800 border border-gray-400 hover:bg-orange-500 hover:text-white px-4 py-2 text-sm font-medium rounded-full transition-colors">
+        <button className="text-gray-800 border border-gray-400 hover:bg-orange-500 hover:text-white px-4 py-2 text-sm font-medium rounded-full transition-colors" onClick={()=>navigate('/signup')}>
           Sign Up
         </button>
 
-        <button className="border border-gray-400 text-gray-800 hover:border-orange-500 hover:text-orange-500 hover:bg-orange-50 px-4 py-2 text-sm font-medium rounded-full transition-colors">
+        <button className="border border-gray-400 text-gray-800 hover:border-orange-500 hover:text-orange-500 hover:bg-orange-50 px-4 py-2 text-sm font-medium rounded-full transition-colors" onClick={() => navigate('/login')}>
           Sign In
         </button>
       </div>
