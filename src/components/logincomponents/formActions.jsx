@@ -1,7 +1,8 @@
+
 import { Button } from "../../components/landingpagecomponents/herosection/ui/button";
 import { motion } from "framer-motion";
 
-export function FormActions() {
+export function FormActions({ isLoading }) {
   return (
     <>
       <motion.div
@@ -23,8 +24,12 @@ export function FormActions() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 1.0 }}
       >
-        <Button className="w-full h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-orange-500/30 transition-all duration-300 transform hover:scale-105">
-          Sign in
+        <Button
+          className="w-full h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-orange-500/30 transition-all duration-300 transform hover:scale-105"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? "Signing in..." : "Sign in"}
         </Button>
       </motion.div>
 

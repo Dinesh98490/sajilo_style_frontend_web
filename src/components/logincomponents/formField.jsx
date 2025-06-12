@@ -2,7 +2,7 @@ import { Eye, EyeOff, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export function FormFields() {
+export function FormFields({ email, setEmail, password, setPassword }) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -20,6 +20,8 @@ export function FormFields() {
           <input
             id="email"
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="username@gmail.com"
             className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 placeholder:text-gray-400 pr-12 pl-4 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-300"
           />
@@ -43,6 +45,8 @@ export function FormFields() {
           <input
             id="password"
             type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 placeholder:text-gray-400 pr-12 pl-4 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-300"
           />
