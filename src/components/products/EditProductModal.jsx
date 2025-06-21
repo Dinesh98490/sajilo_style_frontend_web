@@ -166,6 +166,8 @@ export default function EditProductModal({
 
   if (!product) return null;
 
+
+  //edit products modal
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
