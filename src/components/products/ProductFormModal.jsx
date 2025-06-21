@@ -131,6 +131,7 @@ export default function ProductFormModal({ open, onOpenChange, onProductAdded })
     onOpenChange(false);
   };
 
+  // product form modal 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-screen-2xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
