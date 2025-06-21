@@ -25,6 +25,8 @@ function TopProducts() {
     },
   ];
 
+
+  //top products of the dashboard
   return (
     <Card>
       <CardHeader>
