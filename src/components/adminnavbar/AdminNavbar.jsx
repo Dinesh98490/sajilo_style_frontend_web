@@ -3,6 +3,8 @@ import { Bell, Search, MoreVertical } from 'lucide-react';
 import { Input } from '../landingpagecomponents/herosection/ui/input';
 import { Button } from '../landingpagecomponents/herosection/ui/button';
 
+
+// admin navbar 
 function AdminNavbar() {
   return (
     <header className="bg-white border-b px-6 py-4">
