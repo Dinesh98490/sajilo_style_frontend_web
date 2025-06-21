@@ -25,6 +25,7 @@ function AdminSidebar({ activeItem, setActiveItem }) {
   const navigate = useNavigate();
 
   return (
+    // admin sidebar
     <div className="w-64 bg-white shadow-xl border-r border-gray-100 h-screen flex flex-col">
       {/* Logo */}
       <div className="flex items-center p-4 h-20">
