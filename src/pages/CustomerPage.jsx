@@ -10,6 +10,8 @@ import { Button } from "../components/landingpagecomponents/herosection/ui/butto
 import { UserPlus } from "lucide-react";
 import initialCustomers from "../components/customer/initialCustomer";
 
+
+// customer page
 export default function CustomerPage() {
   const [customers, setCustomers] = useState(initialCustomers);
   const [searchTerm, setSearchTerm] = useState("");
