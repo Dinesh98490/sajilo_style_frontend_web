@@ -17,6 +17,7 @@ import {
 } from "../components/products/ShoeData"
 import EditProductModal from "../components/products/editProductModal"
 
+// product page
 export default function ProductPage() {
   const [showAddProductModal, setShowAddProductModal] = useState(false)
   const [showProductInfo, setShowProductInfo] = useState(false)
