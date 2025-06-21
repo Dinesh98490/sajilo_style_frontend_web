@@ -18,8 +18,8 @@ const onSaleProducts = [
     name: "Ethnic Low Black Natural",
     price: 2500,
     image: IMAGE_PATHS.sale2,
-    rating: null,
-    hasShopNow: false,
+    rating: 3,
+    hasShopNow: true,
     discount: "30%",
   },
   {
@@ -27,8 +27,8 @@ const onSaleProducts = [
     name: "Ethnic Low Black Natural",
     price: 4000,
     image: IMAGE_PATHS.sale3,
-    rating: null,
-    hasShopNow: false,
+    rating: 4,
+    hasShopNow: true,
     discount: "35%",
   },
   {
@@ -36,8 +36,8 @@ const onSaleProducts = [
     name: "Ethnic Low Black Natural",
     price: 2800,
     image: IMAGE_PATHS.sale4,
-    rating: null,
-    hasShopNow: false,
+    rating: 4.2,
+    hasShopNow: true,
     discount: "30%",
   },
 ];

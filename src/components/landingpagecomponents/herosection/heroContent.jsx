@@ -11,7 +11,7 @@ export function HeroContent() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.05,
+        staggerChildren: 0.1,
       },
     },
   };
@@ -23,8 +23,11 @@ export function HeroContent() {
       y: 0,
       transition: {
         type: "spring",
-        stiffness: 300,
-        damping: 20,
+        stiffness: 170,
+        damping: 26,
+        mass: 1,
+        restDelta: 0.001,
+        restSpeed: 0.001,
       },
     },
   };
@@ -59,7 +62,7 @@ export function HeroContent() {
         ))}
       </motion.h1>
 
-      <p className="max-w-[600px] text-gray-500 md:text-xl dark:text-gray-400">
+      <p className="max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
         Elevate your style with our premium quality products designed for comfort and elegance.
       </p>
 

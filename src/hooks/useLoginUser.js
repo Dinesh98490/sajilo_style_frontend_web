@@ -16,7 +16,7 @@ export const useLoginUser = () => {
             onSuccess: (data) => { 
                 login(data?.data, data?.token)
                 toast.success(data?.message || "Login Success")
-                navigate('/')
+                navigate('/admin/dashboard')
 
             },
             onError: (err) => {
