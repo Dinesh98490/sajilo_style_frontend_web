@@ -87,6 +87,8 @@ export default function ProductFormComponent() {
 
   const selectedCategory = categories.find(cat => cat._id === formData.categoryId);
 
+
+  // admin porduct add 
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b px-6 py-4">
