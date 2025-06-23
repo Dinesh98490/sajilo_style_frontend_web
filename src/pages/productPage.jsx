@@ -17,8 +17,12 @@ import {
 } from "../components/products/ShoeData"
 import EditProductModal from "../components/products/editProductModal"
 
+import { useCreateProduct } from "../hooks/admin/useProduct/useCreateProduct"
+
 // product page
 export default function ProductPage() {
+  const { mutate, isLoading: isSubmitting} = useCreateProduct()
+  
   const [showAddProductModal, setShowAddProductModal] = useState(false)
   const [showProductInfo, setShowProductInfo] = useState(false)
   const [addedProduct, setAddedProduct] = useState(null)

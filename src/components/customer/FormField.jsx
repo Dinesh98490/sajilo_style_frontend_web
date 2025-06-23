@@ -1,10 +1,17 @@
-import { useState } from "react"
-import { Card, CardContent } from "../landingpagecomponents/herosection/ui/card"
-import { Button } from "../landingpagecomponents/herosection/ui/button"
-import { Badge } from "../landingpagecomponents/herosection/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
-import { Input } from "../landingpagecomponents/herosection/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../landingpagecomponents/herosection/ui/Table"
+import { useState } from "react";
+import { Card, CardContent } from "../landingpagecomponents/herosection/ui/card";
+import { Button } from "../landingpagecomponents/herosection/ui/button";
+import { Badge } from "../landingpagecomponents/herosection/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { Input } from "../landingpagecomponents/herosection/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../landingpagecomponents/herosection/ui/Table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,27 +22,46 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "./Dialog"
-import { Edit3, Trash2, Search, User, Mail, Phone, Calendar, Eye } from "lucide-react"
+} from "./Dialog";
+import {
+  Edit3,
+  Trash2,
+  Search,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  Eye,
+} from "lucide-react";
+// import { useToast } from "@/hooks/use-toast"
 
-export default function CustomerTable({ customers, onEdit, onDelete }) {
-  const [searchTerm, setSearchTerm] = useState("")
-  console.log(customers)
+export default function CustomerTable({ customers = [], onUpdate, onDelete }) {
+  const [searchTerm, setSearchTerm] = useState("");
+  // const { toast } = useToast()
 
   const filteredCustomers = customers.filter(
     (customer) =>
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone.includes(searchTerm),
-  )
+      customer.phone.includes(searchTerm)
+  );
+
+  const handleDelete = (customer) => {
+    onDelete(customer.id);
+    // toast({
+    //   title: "🗑️ Customer Deleted",
+    //   description: `${customer.fullName} has been removed successfully.`,
+    //   className: "border-red-200 bg-red-50 text-red-900",
+    // });
+  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
-    })
-  }
+    });
+  };
 
   const getStatusBadge = (status) => {
     return status === "Active" ? (
@@ -48,8 +74,8 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
         <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
         Inactive
       </Badge>
-    )
-  }
+    );
+  };
 
   return (
     <Card className="border-0 shadow-lg bg-white">
@@ -75,7 +101,9 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
               {searchTerm ? "No customers found" : "No customers yet"}
             </h3>
             <p className="text-gray-500 text-lg">
-              {searchTerm ? "Try adjusting your search terms" : "Click 'Add New Customer' to get started"}
+              {searchTerm
+                ? "Try adjusting your search terms"
+                : "Click 'Add New Customer' to get started"}
             </p>
           </div>
         ) : (
@@ -95,41 +123,48 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
                       Contact
                     </div>
                   </TableHead>
-                  <TableHead className="text-gray-700 font-semibold py-4">Status</TableHead>
+                  <TableHead className="text-gray-700 font-semibold py-4">
+                    Status
+                  </TableHead>
                   <TableHead className="text-gray-700 font-semibold py-4">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
                       Created
                     </div>
                   </TableHead>
-                  <TableHead className="text-gray-700 font-semibold text-center py-4">Actions</TableHead>
+                  <TableHead className="text-gray-700 font-semibold text-center py-4">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCustomers.map((customer) => (
-                  <TableRow key={customer._id} className="hover:bg-orange-50/30 transition-colors">
+                  <TableRow
+                    key={customer.id}
+                    className="hover:bg-orange-50/30 transition-colors"
+                  >
                     <TableCell className="py-5">
                       <div className="flex items-center gap-4">
                         <Avatar className="w-12 h-12 border-2 border-orange-100">
-
-                        <AvatarImage
-                          src={customer.image ? `${import.meta.env.VITE_API_BASE_IMAGE_URL}/${customer.image}` : "/placeholder.svg"}
-                          alt={customer.name}
-                        />
-                        {!customer.image && (
-                          <><AvatarFallback className="bg-orange-100 text-orange-600 font-semibold">
-                          {customer.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .toUpperCase()}
-                        </AvatarFallback></>
-                        )}
-                          
+                          <AvatarImage
+                            src={customer.image || "/placeholder.svg"}
+                            alt={customer.fullName}
+                          />
+                          <AvatarFallback className="bg-orange-100 text-orange-600 font-semibold">
+                            {customer.fullName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-semibold text-gray-900 text-base">{customer.name}</div>
-                          <div className="text-sm text-gray-500">ID: #{customer._id}</div>
+                          <div className="font-semibold text-gray-900 text-base">
+                            {customer.fullName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            ID: #{customer.id}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -145,9 +180,13 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="py-5">{getStatusBadge(customer.status)}</TableCell>
                     <TableCell className="py-5">
-                      <div className="text-sm text-gray-600">{formatDate(customer.createdAt)}</div>
+                      {getStatusBadge(customer.status)}
+                    </TableCell>
+                    <TableCell className="py-5">
+                      <div className="text-sm text-gray-600">
+                        {formatDate(customer.createdAt)}
+                      </div>
                     </TableCell>
                     <TableCell className="py-5">
                       <div className="flex items-center justify-center gap-2">
@@ -159,11 +198,9 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        {/* Change #2: Call `onEdit` and pass the entire `customer` object */}
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onEdit(customer)}
                           className="h-9 w-9 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg"
                           title="Edit Customer"
                         >
@@ -187,14 +224,18 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
                                 Delete Customer
                               </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete <strong>{customer.name}</strong>? This action cannot
-                                be undone and will permanently remove all customer data.
+                                Are you sure you want to delete{" "}
+                                <strong>{customer.fullName}</strong>? This action
+                                cannot be undone and will permanently remove all
+                                customer data.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel className="border-gray-300">Cancel</AlertDialogCancel>
+                              <AlertDialogCancel className="border-gray-300">
+                                Cancel
+                              </AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => onDelete(customer._id)}
+                                onClick={() => handleDelete(customer)}
                                 className="bg-red-500 hover:bg-red-600 text-white"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
@@ -213,5 +254,5 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
