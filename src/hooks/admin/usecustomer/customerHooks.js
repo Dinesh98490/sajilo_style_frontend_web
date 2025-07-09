@@ -1,9 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllCustomerService } from "../../../services/admin/customerservice/getAllCustomerService";
-import { getOneCustomerService } from "../../../services/admin/customerservice/getOneCustomerService";
-import { updateCustomerService } from "../../../services/admin/customerservice/updateCustomerService";
-import { deleteCustomerService } from "../../../services/admin/customerservice/deleteCustomerService";
-import { createCustomerService } from "../../../services/admin/customerservice/createCustomerService";
+import { getAllCustomerService, getOneCustomerService, updateCustomerService, deleteCustomerService, createCustomerService } from "../../../services/admin/customerservice/customerService";
 
 
 // --- Query Hooks (Read operations) ---
@@ -15,8 +11,8 @@ export const useGetCustomers = () => {
   return useQuery({
     queryKey: ["customers"],
     queryFn: getAllCustomerService,
-    // Optional: Add staleTime to avoid refetching too often
-    staleTime: 1000 * 60 * 5, // 5 minutes
+   
+    
   });
 };
 
@@ -114,7 +110,7 @@ export const useDeleteCustomer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteCustomerService, // Assumes it takes the ID as an argument
+    mutationFn: deleteCustomerService, 
     onMutate: async (customerId) => {
       await queryClient.cancelQueries({ queryKey: CUSTOMERS_QUERY_KEY });
       const previousCustomers = queryClient.getQueryData(CUSTOMERS_QUERY_KEY);

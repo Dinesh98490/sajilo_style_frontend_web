@@ -16,7 +16,7 @@ function AdminSidebar({ activeItem, setActiveItem }) {
   const navigationItems = [
     { icon: Package, label: "Products", route: "/admin/product" },
     { icon: Users, label: "Customers" , route: "/admin/customer"},
-    { icon: ShoppingCart, label: "Orders" },
+    { icon: ShoppingCart, label: "Orders", route: "/admin/order" },
     { icon: Truck, label: "Shipments" },
     { icon: CreditCard, label: "Transactions" },
     { icon: Settings, label: "Settings" },
@@ -48,7 +48,9 @@ function AdminSidebar({ activeItem, setActiveItem }) {
           onClick={() => {
             setActiveItem("Dashboard");
             navigate("/admin/dashboard");
+            navigate("/admin/product");
             navigate("/admin/customer");
+            navigate("/admin/order");
           }}
         >
           <LayoutDashboard

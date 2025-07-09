@@ -1,9 +1,10 @@
 import axios from "../api";
 
 export const postProductApi = (formData) =>
-  axios.post("/admin/product", formData, {
+  axios.post("/admin/product", formData,{
     headers: { "Content-Type": "multipart/form-data" },
   });
+
 
 export const getAllProductApi = () => axios.get("/admin/product");
 

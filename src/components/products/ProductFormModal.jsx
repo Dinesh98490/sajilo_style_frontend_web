@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { useState, useEffect } from "react";
 import { Button } from "../landingpagecomponents/herosection/ui/button";
 import { Input } from "../landingpagecomponents/herosection/ui/input";
 import { Label } from "../landingpagecomponents/herosection/ui/Label";
@@ -6,408 +8,266 @@ import { Textarea } from "../landingpagecomponents/herosection/ui/TextArea";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "../landingpagecomponents/herosection/ui/Dialog";
-import { Upload, X, Plus, Save, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "../landingpagecomponents/herosection/ui/Alert";
+import { Save, Loader2, ImagePlus, X } from "lucide-react";
+import { useGetCategories } from "../../hooks/admin/usecategory/categoryHooks";
+import { useCreateProduct } from "../../hooks/admin/useProduct/productHooks";
+import { useUpdateProduct } from "../../hooks/admin/useProduct/productHooks";
 
-const categories = [
-  { _id: "64a1b2c3d4e5f6789012345a", name: "Sports Shoes" },
-  { _id: "64a1b2c3d4e5f6789012345b", name: "Formal Shoes" },
-  { _id: "64a1b2c3d4e5f6789012345c", name: "Running Shoes" },
-  { _id: "64a1b2c3d4e5f6789012345d", name: "Casual Shoes" },
-];
 
-const colorOptions = [
-  "Red",
-  "Blue",
-  "Green",
-  "Black",
-  "White",
-  "Yellow",
-  "Purple",
-  "Navy",
-];
+const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png", "image/gif"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; 
 
-const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL", ];
+const validationSchema = Yup.object({
+  title: Yup.string().trim().required("Title is required."),
+  desc: Yup.string()
+    .trim()
+    .min(10, "Description must be at least 10 characters.")
+    .required("Description is required."),
+  price: Yup.number()
+    .positive("Price must be a positive number.")
+    .required("Price is required."),
+  image: Yup.mixed()
+    .nullable() 
+    .required("An image is required.")
+    .test("fileOrUrl", "Unsupported file format or invalid image", (value) => {
+      if (!value) return false;
+      if (typeof value === "string") return true;
+      if (value instanceof File) {
+        return (
+          value.size <= MAX_FILE_SIZE && SUPPORTED_FORMATS.includes(value.type)
+        );
+      }
+      return false;
+    }),
+  color: Yup.string().trim().required("Color is required."),
+  size: Yup.string().trim().required("Size is required."),
+  categoryId: Yup.string().required("Category is required."),
+});
 
-export default function ProductFormModal({ open, onOpenChange, onProductAdded }) {
-  const [formData, setFormData] = useState({
-    title: "",
-    desc: "",
-    price: "",
-    images: [],
-    color: "",
-    size: "",
-    categoryId: "",
-  });
+const FormError = ({ name }) => (
+  <ErrorMessage
+    name={name}
+    component="p"
+    className="text-sm text-red-500 font-medium"
+  />
+);
 
-  const [errors, setErrors] = useState({});
-  const [imageUrl, setImageUrl] = useState("");
+export default function ProductFormModal({
+  open,
+  onOpenChange,
+  initialData,
+  onCancel,
+}) {
+  const isEditing = !!initialData;
+  const { data: category = [] } = useGetCategories();
+  const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
+  const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct(); 
+  const isSubmitting = isCreating || isUpdating;
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
+  const [isDragging, setIsDragging] = useState(false);
+
+  const formInitialValues = {
+    title: initialData?.title || "",
+    desc: initialData?.desc || "",
+    price: initialData?.price || "",
+    image: initialData?.imageUrl || null, // FIX: Use imageUrl from data
+    color: initialData?.color || "",
+    size: initialData?.size || "",
+    categoryId: initialData?.category?._id || initialData?.categoryId || "",
+  };
+
+  // --- FIX: The entire submission handler is refactored ---
+  const handleFormSubmit = (values, { resetForm }) => {
+    const formData = new FormData();
+  
+    formData.append("title", values.title);
+    formData.append("desc", values.desc);
+    formData.append("price", values.price);
+    formData.append("color", values.color);
+    formData.append("size", values.size);
+    formData.append("categoryId", values.categoryId);
+  
+    if (values.image instanceof File) {
+      formData.append("image", values.image);
+    } else {
+      console.warn("Invalid or missing image:", values.image);
+      toast.error("Please upload a valid image.");
+      return;
     }
-  };
-
-  const addImageUrl = () => {
-    const trimmed = imageUrl.trim();
-    if (trimmed && !formData.images.includes(trimmed)) {
-      setFormData((prev) => ({
-        ...prev,
-        images: [...prev.images, trimmed],
-      }));
-      setImageUrl("");
+  
+    // Debug formData
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
     }
-  };
-
-  const removeImage = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.title.trim()) newErrors.title = "Title is required";
-    if (!formData.desc.trim()) newErrors.desc = "Description is required";
-    if (!formData.price || Number(formData.price) <= 0)
-      newErrors.price = "Price must be greater than 0";
-    if (formData.images.length === 0)
-      newErrors.images = "At least one image is required";
-    if (!formData.color) newErrors.color = "Color is required";
-    if (!formData.size) newErrors.size = "Size is required";
-    if (!formData.categoryId) newErrors.categoryId = "Category is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = () => {
-    if (!validateForm()) return;
-
-    const newProduct = {
-      _id: Date.now().toString(),
-      ...formData,
-      price: Number(formData.price),
-      brand: "Custom Brand",
-      type: "Custom",
-      material: "Various",
-      createdAt: new Date().toISOString(),
+  
+    const mutationOptions = {
+      onSuccess: () => {
+        resetForm();
+        toast.success(`Product ${isEditing ? 'updated' : 'created'} successfully!`);
+        onOpenChange(false);
+      },
+      onError: () => {
+        toast.error(`Failed to ${isEditing ? 'update' : 'create'} product.`);
+      },
     };
-
-    onProductAdded(newProduct);
-
-    setFormData({
-      title: "",
-      desc: "",
-      price: "",
-      images: [],
-      color: "",
-      size: "",
-      categoryId: "",
-    });
-    setErrors({});
-    onOpenChange(false);
+  
+    if (isEditing) {
+      updateProduct({ id: initialData._id, formData }, mutationOptions);
+    } else {
+      createProduct(formData, mutationOptions);
+    }
   };
+  
 
-  const handleCancel = () => {
-    setFormData({
-      title: "",
-      desc: "",
-      price: "",
-      images: [],
-      color: "",
-      size: "",
-      categoryId: "",
-    });
-    setErrors({});
-    onOpenChange(false);
-  };
-
-  // product form modal 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-screen-2xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
-      <DialogHeader className="text-center pb-8">
-  <DialogTitle className="text-4xl font-extrabold tracking-wide bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400 bg-clip-text text-transparent animate-pulse">
-    Create a new product
-  </DialogTitle>
-</DialogHeader>
+      <DialogContent className="relative max-w-screen-2xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200 p-0">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onCancel}
+          className="absolute right-4 top-4 z-10 rounded-full h-8 w-8 p-0 text-black hover:bg-gray-200/75 transition-colors"
+        >
+          <X className="h-5 w-5" />
+          <span className="sr-only">Close</span>
+        </Button>
 
+        <Formik
+          initialValues={formInitialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleFormSubmit}
+          enableReinitialize
+        >
+          {({ errors, touched, values, setFieldValue }) => {
+            const handleFileSelect = (fileList) => {
+              const file = fileList?.[0];
+              if (file) {
+                setFieldValue("image", file);
+              }
+            };
 
-        {Object.keys(errors).length > 0 && (
-          <Alert variant="destructive" className="mb-6 border-red-300 bg-red-50 flex items-center gap-2 p-4 rounded">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Please fix the highlighted errors before creating your product.
-            </AlertDescription>
-          </Alert>
-        )}
+            const removeImage = () => {
+              setFieldValue("image", null);
+            };
 
-        <div className="space-y-8 w-full max-w-screen-xl mx-auto">
-          {/* Basic Info */}
-          <section className="bg-white rounded-xl p-6 shadow-lg border border-orange-100">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">Basic Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
-                  Product Title <span className="text-orange-500">*</span>
-                </Label>
-                <Input
-                  id="title"
-                  placeholder="Enter an amazing product title..."
-                  value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
-                  className={`h-12 border-2 transition-all duration-200 ${
-                    errors.title
-                      ? "border-red-400 focus:border-red-500"
-                      : "border-orange-200 focus:border-orange-400 hover:border-orange-300"
-                  }`}
-                />
-                {errors.title && (
-                  <p className="text-sm text-red-500 font-medium">{errors.title}</p>
-                )}
-              </div>
+            let imageUrlForPreview = null;
+            if (values.image) {
+              imageUrlForPreview =
+                typeof values.image === "string"
+                  ? values.image
+                  : URL.createObjectURL(values.image);
+            }
 
-              <div className="space-y-3">
-                <Label htmlFor="price" className="text-sm font-semibold text-gray-700">
-                  Price ($) <span className="text-orange-500">*</span>
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange("price", e.target.value)}
-                  className={`h-12 border-2 transition-all duration-200 ${
-                    errors.price
-                      ? "border-red-400 focus:border-red-500"
-                      : "border-orange-200 focus:border-orange-400 hover:border-orange-300"
-                  }`}
-                />
-                {errors.price && (
-                  <p className="text-sm text-red-500 font-medium">{errors.price}</p>
-                )}
-              </div>
-            </div>
+            return (
+              <Form>
+                <DialogHeader className="text-center p-6 border-b border-orange-200">
+                  <DialogTitle className="text-3xl font-bold tracking-wide bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400 bg-clip-text text-transparent">
+                    {isEditing ? "Edit Product" : "Create a New Product"}
+                  </DialogTitle>
+                </DialogHeader>
 
-            <div className="space-y-3 mt-6">
-              <Label htmlFor="desc" className="text-sm font-semibold text-gray-700">
-                Description <span className="text-orange-500">*</span>
-              </Label>
-              <Textarea
-                id="desc"
-                placeholder="Describe what makes your product special..."
-                rows={4}
-                value={formData.desc}
-                onChange={(e) => handleInputChange("desc", e.target.value)}
-                className={`border-2 transition-all duration-200 resize-none ${
-                  errors.desc
-                    ? "border-red-400 focus:border-red-500"
-                    : "border-orange-200 focus:border-orange-400 hover:border-orange-300"
-                }`}
-              />
-              {errors.desc && (
-                <p className="text-sm text-red-500 font-medium">{errors.desc}</p>
-              )}
-            </div>
-          </section>
-
-          {/* Attributes */}
-          <section className="bg-white rounded-xl p-6 shadow-lg border border-orange-100">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">Product Attributes</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Category */}
-              <div className="space-y-3">
-                <Label htmlFor="category" className="text-sm font-semibold text-gray-700">
-                  Category <span className="text-orange-500">*</span>
-                </Label>
-                <select
-                  id="category"
-                  value={formData.categoryId}
-                  onChange={(e) => handleInputChange("categoryId", e.target.value)}
-                  className={`h-12 w-full border-2 rounded-md transition-all duration-200 ${
-                    errors.categoryId
-                      ? "border-red-400 focus:border-red-500"
-                      : "border-orange-200 focus:border-orange-400 hover:border-orange-300"
-                  }`}
-                >
-                  <option value="" disabled>
-                    Choose a category
-                  </option>
-                  {categories.map(({ _id, name }) => (
-                    <option key={_id} value={_id}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-                {errors.categoryId && (
-                  <p className="text-sm text-red-500 font-medium">{errors.categoryId}</p>
-                )}
-              </div>
-
-              {/* Color */}
-              <div className="space-y-3">
-                <Label htmlFor="color" className="text-sm font-semibold text-gray-700">
-                  Color <span className="text-orange-500">*</span>
-                </Label>
-                <select
-                  id="color"
-                  value={formData.color}
-                  onChange={(e) => handleInputChange("color", e.target.value)}
-                  className={`h-12 w-full border-2 rounded-md transition-all duration-200 ${
-                    errors.color
-                      ? "border-red-400 focus:border-red-500"
-                      : "border-orange-200 focus:border-orange-400 hover:border-orange-300"
-                  }`}
-                >
-                  <option value="" disabled>
-                    Pick a color
-                  </option>
-                  {colorOptions.map((color) => (
-                    <option key={color} value={color}>
-                      {color}
-                    </option>
-                  ))}
-                </select>
-                {errors.color && (
-                  <p className="text-sm text-red-500 font-medium">{errors.color}</p>
-                )}
-              </div>
-
-              {/* Size */}
-              <div className="space-y-3">
-                <Label htmlFor="size" className="text-sm font-semibold text-gray-700">
-                  Size <span className="text-orange-500">*</span>
-                </Label>
-                <select
-                  id="size"
-                  value={formData.size}
-                  onChange={(e) => handleInputChange("size", e.target.value)}
-                  className={`h-12 w-full border-2 rounded-md transition-all duration-200 ${
-                    errors.size
-                      ? "border-red-400 focus:border-red-500"
-                      : "border-orange-200 focus:border-orange-400 hover:border-orange-300"
-                  }`}
-                >
-                  <option value="" disabled>
-                    Select size
-                  </option>
-                  {sizeOptions.map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-                {errors.size && (
-                  <p className="text-sm text-red-500 font-medium">{errors.size}</p>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* Images */}
-          <section className="bg-white rounded-xl p-6 shadow-lg border border-orange-100">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">
-              Product Images <span className="text-orange-500">*</span>
-            </h3>
-
-            <div className="flex gap-3 mb-4">
-              <Input
-                placeholder="Paste your image URL here (https://...)"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addImageUrl();
-                  }
-                }}
-                className="h-12 border-2 border-orange-200 focus:border-orange-400 hover:border-orange-300 transition-all duration-200"
-              />
-              <Button
-                type="button"
-                onClick={addImageUrl}
-                className="h-12 px-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold shadow-lg transition-all duration-200"
-              >
-                <Plus className="size-4 mr-2" />
-                Add Image
-              </Button>
-            </div>
-
-            {errors.images && (
-              <p className="text-sm text-red-500 font-medium mb-4">{errors.images}</p>
-            )}
-
-            {formData.images.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {formData.images.map((image, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={image || "/placeholder.svg?height=150&width=150"}
-                      alt={`Product ${index + 1}`}
-                      className="w-full h-36 object-cover rounded-xl border-2 border-orange-200 shadow-md transition-all duration-200 group-hover:shadow-lg"
-                      onError={(e) => {
-                        e.target.src =
-                          "/placeholder.svg?height=150&width=150&text=Invalid+URL";
-                      }}
-                    />
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 size-8 opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg"
-                      onClick={() => removeImage(index)}
-                    >
-                      <X className="size-4" />
-                    </Button>
-                    <div className="absolute bottom-2 left-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm px-3 py-1 rounded-full font-semibold shadow-lg">
-                      #{index + 1}
+                <div className="p-8 space-y-8">
+                  {/* ... (Your form sections are fine, no changes needed here) ... */}
+                  {/* Basic Info */}
+                  <section className="bg-white rounded-xl p-6 shadow-lg border border-orange-100">
+                    <h3 className="text-xl font-bold text-gray-800 mb-6">
+                      Basic Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="title">Product Title <span className="text-orange-500">*</span></Label>
+                        <Field id="title" name="title" as={Input} className={`h-12 border-2 ${touched.title && errors.title && "border-red-400"}`}/>
+                        <FormError name="title" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="price">Price ($) <span className="text-orange-500">*</span></Label>
+                        <Field id="price" name="price" type="number" as={Input} className={`h-12 border-2 ${touched.price && errors.price && "border-red-400"}`}/>
+                        <FormError name="price" />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="border-2 border-dashed border-orange-300 rounded-xl p-12 text-center bg-gradient-to-br from-orange-50 to-amber-50">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-200 to-amber-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Upload className="size-8 text-orange-600" />
+                    <div className="space-y-2 mt-6">
+                      <Label htmlFor="desc">Description <span className="text-orange-500">*</span></Label>
+                      <Field id="desc" name="desc" as={Textarea} rows={4} className={`border-2 resize-none ${touched.desc && errors.desc && "border-red-400"}`}/>
+                      <FormError name="desc" />
+                    </div>
+                  </section>
+                  {/* Attributes */}
+                  <section className="bg-white rounded-xl p-6 shadow-lg border border-orange-100">
+                     <h3 className="text-xl font-bold text-gray-800 mb-6">Product Attributes</h3>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                           <Label htmlFor="categoryId">Category <span className="text-orange-500">*</span></Label>
+                           <Field as="select" id="categoryId" name="categoryId" className={`w-full h-12 border-2 rounded-md px-3 bg-white ${touched.categoryId && errors.categoryId && "border-red-400"}`}>
+                              <option value="">Select Category</option>
+                              {category.map((cat) => (
+                                <option key={cat._id} value={cat._id}>{cat.title}</option>
+                              ))}
+                           </Field>
+                           <FormError name="categoryId" />
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor="color">Color <span className="text-orange-500">*</span></Label>
+                           <Field id="color" name="color" as={Input} className={`h-12 border-2 ${touched.color && errors.color && "border-red-400"}`}/>
+                           <FormError name="color" />
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor="size">Size <span className="text-orange-500">*</span></Label>
+                           <Field id="size" name="size" as={Input} className={`h-12 border-2 ${touched.size && errors.size && "border-red-400"}`}/>
+                           <FormError name="size" />
+                        </div>
+                     </div>
+                  </section>
+                  {/* Image Upload */}
+                  <section className="bg-white rounded-xl p-6 shadow-lg border border-orange-100">
+                    <h3 className="text-xl font-bold text-gray-800 mb-6">Product Image <span className="text-orange-500">*</span></h3>
+                    <input id="file-upload" type="file" accept="image/*" onChange={(e) => handleFileSelect(e.target.files)} className="hidden"/>
+                    {!values.image && (
+                      <label htmlFor="file-upload" onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={(e) => { e.preventDefault(); setIsDragging(false); handleFileSelect(e.dataTransfer.files);}}
+                        className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${ isDragging ? "border-orange-500 bg-orange-100" : "border-orange-300 bg-orange-50/50 hover:bg-orange-100"}`}>
+                        <ImagePlus className={`w-10 h-10 mb-2 ${isDragging && "scale-110"}`} />
+                        <span className="font-semibold text-orange-700">Drag & Drop an image here</span>
+                        <span className="text-sm text-gray-500">or click to browse</span>
+                      </label>
+                    )}
+                    <FormError name="image" />
+                    {imageUrlForPreview && (
+                      <div className="mt-6">
+                        <p className="text-sm font-medium text-gray-600 mb-2">Image Preview:</p>
+                        <div className="relative group w-48">
+                          <img src={imageUrlForPreview} alt="Preview" onLoad={() => values.image instanceof File && URL.revokeObjectURL(imageUrlForPreview)} className="w-full h-48 object-cover rounded-xl border-2 border-orange-200"/>
+                          <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={removeImage}>
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </section>
                 </div>
-                <p className="text-lg font-semibold text-orange-700 mb-2">
-                  No images added yet
-                </p>
-                <p className="text-sm text-orange-600">
-                  Add stunning images to showcase your product
-                </p>
-              </div>
-            )}
-          </section>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-4 pt-6 border-t border-orange-200">
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              className="h-12 px-8 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold transition-all duration-200"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              className="h-12 px-8 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
-            >
-              <Save className="size-5 mr-2" />
-              Create Product
-            </Button>
-          </div>
-        </div>
+                <div className="flex justify-end gap-4 p-6 border-t border-orange-200 mt-8">
+                  <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting} className="h-12 px-8 border-2">
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting} className="h-12 px-8 bg-orange-500 hover:bg-orange-600 text-white" style={{ minWidth: "180px" }}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="size-5 mr-2 animate-spin" /> Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="size-5 mr-2" />{" "}
+                        {isEditing ? "Save Changes" : "Create Product"}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Form>
+            );
+          }}
+        </Formik>
       </DialogContent>
     </Dialog>
   );

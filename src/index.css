@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* These are required for the open/close animation and visibility */
-.animate-in {
-    animation-name: slide-in-from-top; /* or whatever you configured */
+
+/* .animate-in {
+    animation-name: slide-in-from-top; 
     animation-duration: 150ms;
   }
   
@@ -13,7 +13,7 @@
     animation-duration: 150ms;
   }
   
-  /* Example styles that might be missing or overridden */
+  
   [data-state="closed"] {
-    display: none; /* This is crucial! */
-  }
+    display: none; 
+  } */

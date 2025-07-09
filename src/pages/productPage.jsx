@@ -1,248 +1,173 @@
-import { useState } from "react"
-import { Button } from "../components/landingpagecomponents/herosection/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../components/landingpagecomponents/herosection/ui/card"
-import { Input } from "../components/landingpagecomponents/herosection/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/landingpagecomponents/herosection/ui/Select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/landingpagecomponents/herosection/ui/tabs"
-import { Search } from "lucide-react"
+import { useState } from "react";
+import { Button } from "../components/landingpagecomponents/herosection/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/landingpagecomponents/herosection/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/landingpagecomponents/herosection/ui/tabs";
+import { Package, AlertCircle, X, DollarSign, Palette, Ruler } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/landingpagecomponents/herosection/ui/Dialog";
+import { Badge } from "../components/landingpagecomponents/herosection/ui/badge";
 
-import ProductFormModal from "../components/products/productFormModal"
-import ProductInfoModal from "../components/products/productInfoModal"
-import ShoeTable from "../components/products/shoeTable"
+import ProductTable from "../components/products/ProductTable";
+import ProductFormModal from "../components/products/productFormModal";
+
 import {
-  runningShoes as initialRunningShoes,
-  casualShoes as initialCasualShoes,
-  formalShoes as initialFormalShoes,
-  sportsShoes as initialSportsShoes,
-} from "../components/products/ShoeData"
-import EditProductModal from "../components/products/editProductModal"
+  useGetProducts,
+  useCreateProduct,
+  useUpdateProduct,
+  useDeleteProduct,
+} from "../hooks/admin/useProduct/productHooks";
 
-import { useCreateProduct } from "../hooks/admin/useProduct/useCreateProduct"
-
-// product page
 export default function ProductPage() {
-  const { mutate, isLoading: isSubmitting} = useCreateProduct()
+  const [formState, setFormState] = useState({ mode: 'closed', product: null });
+  const [viewingProduct, setViewingProduct] = useState(null);
+
+  const { data: productsData, isLoading, error: queryError } = useGetProducts();
+  const products = Array.isArray(productsData?.data) ? productsData.data : [];
+
+  const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
+  const deleteProductMutation = useDeleteProduct();
+
+  const isMutating = createProductMutation.isPending || updateProductMutation.isPending;
+  const mutationError = createProductMutation.error || updateProductMutation.error || deleteProductMutation.error;
+
+  const handleAddNewClick = () => {
+    setFormState({ mode: 'adding', product: null });
+  };
+
+  const handleEditClick = (product) => {
+    setFormState({ mode: 'editing', product: product });
+  };
   
-  const [showAddProductModal, setShowAddProductModal] = useState(false)
-  const [showProductInfo, setShowProductInfo] = useState(false)
-  const [addedProduct, setAddedProduct] = useState(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterBrand, setFilterBrand] = useState("all")
-  const [filterColor, setFilterColor] = useState("all")
-  const [editingProduct, setEditingProduct] = useState(null)
+  const handleFormCancel = () => {
+    setFormState({ mode: 'closed', product: null });
+  };
 
-  // State for shoe data
-  const [runningShoes, setRunningShoes] = useState(initialRunningShoes)
-  const [casualShoes, setCasualShoes] = useState(initialCasualShoes)
-  const [formalShoes, setFormalShoes] = useState(initialFormalShoes)
-  const [sportsShoes, setSportsShoes] = useState(initialSportsShoes)
-
-  const allShoes = [...runningShoes, ...casualShoes, ...formalShoes, ...sportsShoes]
-  const brands = [...new Set(allShoes.map((shoe) => shoe.brand))]
-  const colors = [...new Set(allShoes.map((shoe) => shoe.color))]
-
-  const handleProductAdded = (product) => {
-    setAddedProduct(product)
-    setShowProductInfo(true)
-
-    // Add to appropriate category based on type
-    switch (product.type) {
-      case "Running":
-        setRunningShoes((prev) => [...prev, product])
-        break
-      case "Casual":
-        setCasualShoes((prev) => [...prev, product])
-        break
-      case "Formal":
-        setFormalShoes((prev) => [...prev, product])
-        break
-      case "Basketball":
-      case "Soccer":
-      case "Cross Training":
-        setSportsShoes((prev) => [...prev, product])
-        break
-      default:
-        setCasualShoes((prev) => [...prev, product])
+  const handleFormSubmit = (formData) => {
+    if (formState.mode === 'editing') {
+      updateProductMutation.mutate({ id: formState.product._id, formData }, {
+        onSuccess: () => handleFormCancel(),
+      });
+    } else if (formState.mode === 'adding') {
+      createProductMutation.mutate(formData, {
+        onSuccess: () => handleFormCancel(),
+      });
     }
-  }
+  };
+  
+  const handleDeleteProduct = (id) => {
+    deleteProductMutation.mutate(id);
+  };
+  
+  const handleViewClick = (product) => {
+    setViewingProduct(product);
+  };
 
-  const handleDeleteShoe = (id) => {
-    setRunningShoes((prev) => prev.filter((shoe) => shoe._id !== id))
-    setCasualShoes((prev) => prev.filter((shoe) => shoe._id !== id))
-    setFormalShoes((prev) => prev.filter((shoe) => shoe._id !== id))
-    setSportsShoes((prev) => prev.filter((shoe) => shoe._id !== id))
-  }
+  const runningShoes = products.filter(p => p.category?.name === "Running Shoes");
+  const casualShoes = products.filter(p => p.category?.name === "Casual Shoes");
+  const formalShoes = products.filter(p => p.category?.name === "Formal Shoes");
+  const sportsShoes = products.filter(p => p.category?.name === "Sports Shoes");
 
-  const handleEditShoe = (updatedProduct) => {
-    const updateInCategory = (shoes, setShoes) => {
-      setShoes((prev) => prev.map((shoe) => (shoe._id === updatedProduct._id ? updatedProduct : shoe)))
-    }
-
-    updateInCategory(runningShoes, setRunningShoes)
-    updateInCategory(casualShoes, setCasualShoes)
-    updateInCategory(formalShoes, setFormalShoes)
-    updateInCategory(sportsShoes, setSportsShoes)
-  }
+  if (isLoading) return <div className="p-8 text-center">Loading products...</div>;
+  if (queryError) return <div className="p-8 text-center text-red-500">Error: {queryError.message}</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
-      {/* Header with Add Product Button */}
       <header className="bg-white border-b border-orange-200 px-6 py-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-              Shoe Collections
+              Product Management
             </h1>
           </div>
-          <Button
-            onClick={() => setShowAddProductModal(true)}
-            className="h-12 px-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
-          >
-            Add Product
+          <Button onClick={handleAddNewClick} className="h-12 px-6 bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+            Add New Product
           </Button>
         </div>
       </header>
 
       <main className="container mx-auto px-6 py-8">
-        {/* Filters */}
-        <Card className="mb-6 border-orange-200 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-orange-100 to-amber-100">
-            <CardTitle className="text-orange-800">Filters & Search</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-orange-500" />
-                <Input
-                  placeholder="Search Shoes by Name"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-12 border-2 border-orange-200 focus:border-orange-400 hover:border-orange-300 transition-all duration-200"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {mutationError && (
+          <div className="mb-4 p-4 bg-red-100 text-red-700 border-l-4 border-red-500 rounded-md flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" />
+            <span>An error occurred: {mutationError.response?.data?.message || mutationError.message}</span>
+          </div>
+        )}
 
-        {/* Shoe Category Tabs */}
         <Tabs defaultValue="running" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white border-2 border-orange-200 p-1 rounded-xl shadow-lg">
-            <TabsTrigger
-              value="running"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white font-semibold transition-all duration-200"
-            >
-              Running Shoes
-            </TabsTrigger>
-            <TabsTrigger
-              value="casual"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white font-semibold transition-all duration-200"
-            >
-              Casual Shoes
-            </TabsTrigger>
-            <TabsTrigger
-              value="formal"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white font-semibold transition-all duration-200"
-            >
-              Formal Shoes
-            </TabsTrigger>
-            <TabsTrigger
-              value="sports"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white font-semibold transition-all duration-200"
-            >
-              Sports Shoes
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white border-2 border-orange-200 p-1 rounded-xl shadow-lg">
+            <TabsTrigger value="running" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Running</TabsTrigger>
+            <TabsTrigger value="casual" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Casual</TabsTrigger>
+            <TabsTrigger value="formal" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Formal</TabsTrigger>
+            <TabsTrigger value="sports" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Sports</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="running">
-            <ShoeTable
-              shoes={runningShoes}
-              title="Running Shoes"
-              searchTerm={searchTerm}
-              filterBrand={filterBrand}
-              filterColor={filterColor}
-              onDeleteShoe={handleDeleteShoe}
-              onEditShoe={(shoe) => setEditingProduct(shoe)}
-            />
-          </TabsContent>
-
-          <TabsContent value="casual">
-            <ShoeTable
-              shoes={casualShoes}
-              title="Casual Shoes"
-              searchTerm={searchTerm}
-              filterBrand={filterBrand}
-              filterColor={filterColor}
-              onDeleteShoe={handleDeleteShoe}
-              onEditShoe={(shoe) => setEditingProduct(shoe)}
-            />
-          </TabsContent>
-
-          <TabsContent value="formal">
-            <ShoeTable
-              shoes={formalShoes}
-              title="Formal Shoes"
-              searchTerm={searchTerm}
-              filterBrand={filterBrand}
-              filterColor={filterColor}
-              onDeleteShoe={handleDeleteShoe}
-              onEditShoe={(shoe) => setEditingProduct(shoe)}
-            />
-          </TabsContent>
-
-          <TabsContent value="sports">
-            <ShoeTable
-              shoes={sportsShoes}
-              title="Sports Shoes"
-              searchTerm={searchTerm}
-              filterBrand={filterBrand}
-              filterColor={filterColor}
-              onDeleteShoe={handleDeleteShoe}
-              onEditShoe={(shoe) => setEditingProduct(shoe)}
-            />
-          </TabsContent>
+          <TabsContent value="running"><ProductTable products={runningShoes} onView={handleViewClick} onEdit={handleEditClick} onDelete={handleDeleteProduct} /></TabsContent>
+          <TabsContent value="casual"><ProductTable products={casualShoes} onView={handleViewClick} onEdit={handleEditClick} onDelete={handleDeleteProduct} /></TabsContent>
+          <TabsContent value="formal"><ProductTable products={formalShoes} onView={handleViewClick} onEdit={handleEditClick} onDelete={handleDeleteProduct} /></TabsContent>
+          <TabsContent value="sports"><ProductTable products={sportsShoes} onView={handleViewClick} onEdit={handleEditClick} onDelete={handleDeleteProduct} /></TabsContent>
         </Tabs>
-
-        {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
-          {[ 
-            { title: "Running Shoes", shoes: runningShoes },
-            { title: "Casual Shoes", shoes: casualShoes },
-            { title: "Formal Shoes", shoes: formalShoes },
-            { title: "Sports Shoes", shoes: sportsShoes },
-          ].map(({ title, shoes }) => (
-            <Card key={title} className="border-orange-200 shadow-lg hover:shadow-xl transition-all duration-200">
-              <CardHeader className="pb-2 bg-gradient-to-r from-orange-100 to-amber-100">
-                <CardTitle className="text-sm font-medium text-orange-800">{title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-orange-600">{shoes.length}</div>
-                <p className="text-xs text-orange-500">
-                  Avg: $
-                  {shoes.length > 0
-                    ? (shoes.reduce((sum, shoe) => sum + shoe.price, 0) / shoes.length).toFixed(2)
-                    : "0.00"}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </main>
 
-      {/* Modals */}
       <ProductFormModal
-        open={showAddProductModal}
-        onOpenChange={setShowAddProductModal}
-        onProductAdded={handleProductAdded}
+        open={formState.mode !== 'closed'}
+        onOpenChange={(isOpen) => !isOpen && handleFormCancel()}
+        initialData={formState.product}
+        onSubmit={handleFormSubmit}
+        onCancel={handleFormCancel}
+        isSubmitting={isMutating}
       />
 
-      <ProductInfoModal open={showProductInfo} onOpenChange={setShowProductInfo} product={addedProduct} />
+      <Dialog open={!!viewingProduct} onOpenChange={() => setViewingProduct(null)}>
+        <DialogContent className="sm:max-w-2xl bg-white p-0">
+          {viewingProduct && (
+            <>
+              <Button variant="ghost" onClick={() => setViewingProduct(null)} className="absolute right-4 top-4 rounded-full h-8 w-8 p-0">
+                <X className="h-4 w-4" />
+              </Button>
+              <DialogHeader className="p-6 pb-4 border-b">
+                <DialogTitle className="text-2xl font-bold text-orange-600">{viewingProduct.title}</DialogTitle>
+                <DialogDescription>
+                  <Badge variant="outline">{viewingProduct.category?.name}</Badge>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="font-semibold text-gray-500 flex items-center gap-2"><DollarSign size={14} /> Price</div>
+                    <div className="text-gray-900 font-medium">${viewingProduct.price?.toFixed(2)}</div>
 
-      <EditProductModal
-        open={!!editingProduct}
-        onOpenChange={() => setEditingProduct(null)}
-        product={editingProduct}
-        onProductUpdated={handleEditShoe}
-      />
+                    <div className="font-semibold text-gray-500 flex items-center gap-2"><Palette size={14} /> Color</div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full border" style={{backgroundColor: viewingProduct.color?.toLowerCase()}}/>
+                      {viewingProduct.color}
+                    </div>
+
+                    <div className="font-semibold text-gray-500 flex items-center gap-2"><Ruler size={14} /> Size</div>
+                    <div className="text-gray-900">{viewingProduct.size}</div>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold text-gray-700">Description</h4>
+                    <p className="text-sm text-gray-600">{viewingProduct.desc}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-gray-700 mb-2">Image</h4>
+                  {/* --- CORRECTED: Display a single image using imageUrl --- */}
+                  {viewingProduct.imageUrl ? (
+                    <img 
+                      src={viewingProduct.imageUrl} 
+                      alt={viewingProduct.title} 
+                      className="rounded-lg object-cover w-full h-auto max-h-80 border"
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-500">No image available.</p>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }

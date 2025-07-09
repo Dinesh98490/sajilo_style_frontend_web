@@ -8,7 +8,7 @@ export function Dialog({ open, onOpenChange, children }) {
       onClick={() => onOpenChange(false)}
       className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50"
     >
-      {/* Prevent click propagation to backdrop */}
+     
       <div onClick={(e) => e.stopPropagation()}>{children}</div>
     </div>
   );
@@ -34,4 +34,22 @@ export function DialogTitle({ children }) {
 
 export function DialogDescription({ children }) {
   return <p className="text-gray-600 mt-1">{children}</p>;
+}
+
+
+export function DialogTrigger({ children }) {
+  const { setIsOpen } = useContext(DialogContext);
+  
+  
+  const child = Children.only(children);
+  return cloneElement(child, {
+    ...child.props,
+    onClick: () => {
+     
+      if (child.props.onClick) {
+        child.props.onClick();
+      }
+      setIsOpen(true);
+    },
+  });
 }

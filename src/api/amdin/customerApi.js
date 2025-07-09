@@ -10,7 +10,7 @@ export const getAllCustomerApi = () => axios.get("/admin/customer");
 
 
 //Get an order by Id
-export const getOneCustomerApi = () => axios.get(`/admin/customer/${id}`, params);
+export const getOneCustomerApi = (id) => axios.get(`/admin/user/${id}`);
 
 // Update an order by ID
 export const updateCustomerApi = (id, params) => axios.put(`/admin/customer/${id}`, params,{

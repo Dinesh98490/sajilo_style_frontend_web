@@ -1,45 +1,51 @@
 import { useState } from "react";
 import CustomerForm from "../components/customer/CustomerForm";
 import CustomerTable from "../components/customer/CustomerTable";
-import { Users, UserPlus, X, AlertCircle } from "lucide-react";
+import { Users, UserPlus, X, AlertCircle, Mail, Phone, Calendar, MapPin, ZoomIn } from "lucide-react";
 import { Button } from "../components/landingpagecomponents/herosection/ui/button";
-// Corrected imports to use our new hooks file
 import {
   useGetCustomers,
   useCreateCustomer,
   useUpdateCustomer,
   useDeleteCustomer,
 } from "../hooks/admin/usecustomer/customerHooks";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../components/landingpagecomponents/herosection/ui/Dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/customer/avatar";
+import { Badge } from "../components/landingpagecomponents/herosection/ui/badge";
 
 export default function CustomerPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
+  const [viewingCustomer, setViewingCustomer] = useState(null);
+  const [imageViewerSrc, setImageViewerSrc] = useState(null);
 
   // --- Data Fetching ---
   const { data, isLoading, error: queryError } = useGetCustomers();
-  // Ensure customers is always an array to prevent crashes\
   const customers = Array.isArray(data?.data) ? data.data : [];
-  console.log("data for log",customers)
 
   // --- Mutations ---
   const createCustomerMutation = useCreateCustomer();
   const updateCustomerMutation = useUpdateCustomer();
   const deleteCustomerMutation = useDeleteCustomer();
 
-  // Combine mutation states for unified UI feedback
-  const isMutating = 
-    createCustomerMutation.isPending || 
-    updateCustomerMutation.isPending || 
+  const isMutating =
+    createCustomerMutation.isPending ||
+    updateCustomerMutation.isPending ||
     deleteCustomerMutation.isPending;
 
-  const mutationError = 
-    createCustomerMutation.error || 
-    updateCustomerMutation.error || 
+  const mutationError =
+    createCustomerMutation.error ||
+    updateCustomerMutation.error ||
     deleteCustomerMutation.error;
 
   // --- Event Handlers ---
   const handleAddCustomer = (formData) => {
-    // This now works because the hook handles the FormData conversion
     createCustomerMutation.mutate(formData, {
       onSuccess: () => {
         setShowForm(false);
@@ -48,7 +54,6 @@ export default function CustomerPage() {
   };
 
   const handleUpdateCustomer = (id, formData) => {
-    // This also works because the hook handles the FormData conversion
     updateCustomerMutation.mutate({ id, formData }, {
       onSuccess: () => {
         setShowForm(false);
@@ -58,20 +63,43 @@ export default function CustomerPage() {
   };
 
   const handleDeleteCustomer = (id) => {
-    if (window.confirm("Are you sure you want to delete this customer?")) {
-      deleteCustomerMutation.mutate(id);
-    }
+    deleteCustomerMutation.mutate(id);
   };
 
   const handleEditClick = (customer) => {
     setEditingCustomer(customer);
-    console.log("update test:",customer);
     setShowForm(true);
+  };
+
+  const handleViewClick = (customer) => {
+    setViewingCustomer(customer);
   };
 
   const handleFormCancel = () => {
     setShowForm(false);
     setEditingCustomer(null);
+  };
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "long", day: "numeric", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  };
+
+  const getStatusBadge = (status) => {
+    const statusMap = {
+      Active: { bg: "bg-green-100", text: "text-green-700", dot: "bg-green-500" },
+      Inactive: { bg: "bg-gray-100", text: "text-gray-600", dot: "bg-gray-400" },
+    };
+    const currentStatus = statusMap[status] || statusMap.Inactive;
+    return (
+      <Badge className={`${currentStatus.bg} ${currentStatus.text} hover:${currentStatus.bg} font-medium`}>
+        <div className={`w-2 h-2 ${currentStatus.dot} rounded-full mr-2`}></div>
+        {status}
+      </Badge>
+    );
   };
 
   // --- Render Logic ---
@@ -106,28 +134,27 @@ export default function CustomerPage() {
 
       <div className="container mx-auto px-6 py-8">
         {mutationError && (
-            <div className="max-w-2xl mx-auto mb-4 p-4 bg-red-100 text-red-700 border border-red-200 rounded-md flex items-center gap-2">
-                <AlertCircle className="w-5 h-5"/>
-                <span>An error occurred: {mutationError.response?.data?.message || mutationError.message}</span>
-            </div>
+          <div className="max-w-2xl mx-auto mb-4 p-4 bg-red-100 text-red-700 border border-red-200 rounded-md flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" />
+            <span>An error occurred: {mutationError.response?.data?.message || mutationError.message}</span>
+          </div>
         )}
 
         {showForm ? (
           <div className="max-w-2xl mx-auto">
-             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {editingCustomer ? "Edit Customer" : "Add New Customer"}
-                </h2>
-                <Button variant="ghost" size="sm" onClick={handleFormCancel}>
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {editingCustomer ? "Edit Customer" : "Add New Customer"}
+              </h2>
+              <Button variant="ghost" size="sm" onClick={handleFormCancel}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
             <CustomerForm
               initialData={editingCustomer}
-              // Use _id from MongoDB. If you aliased it to 'id', you can use that.
               onSubmit={editingCustomer ? (data) => handleUpdateCustomer(editingCustomer._id, data) : handleAddCustomer}
               onCancel={handleFormCancel}
-              isSubmitting={isMutating} 
+              isSubmitting={isMutating}
             />
           </div>
         ) : (
@@ -137,12 +164,130 @@ export default function CustomerPage() {
             <CustomerTable
               customers={customers}
               onEdit={handleEditClick}
+              onView={handleViewClick}
               onDelete={handleDeleteCustomer}
               isProcessing={isMutating}
             />
           </div>
         )}
       </div>
+
+      {/* --- CUSTOMER DETAILS DIALOG --- */}
+      <Dialog
+        open={!!viewingCustomer}
+        onOpenChange={(isOpen) => !isOpen && setViewingCustomer(null)}
+      >
+        <DialogContent className="sm:max-w-lg bg-white p-0">
+          {viewingCustomer && (
+            <>
+              <Button
+                variant="ghost"
+                onClick={() => setViewingCustomer(null)}
+                className="absolute right-4 top-4 rounded-full h-8 w-8 p-0 text-gray-500 hover:bg-orange-100 hover:text-orange-600 transition-colors"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+              
+              <DialogHeader className="text-left p-6 pb-4">
+                <DialogTitle className="text-2xl font-bold text-gray-900">Customer Details</DialogTitle>
+                <DialogDescription>Full information for {viewingCustomer.name}.</DialogDescription>
+              </DialogHeader>
+
+              <div className="px-6 space-y-6">
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (viewingCustomer.image) {
+                        setImageViewerSrc(`${import.meta.env.VITE_API_BASE_IMAGE_URL}/${viewingCustomer.image}`);
+                      }
+                    }}
+                    className="relative group flex-shrink-0"
+                    disabled={!viewingCustomer.image}
+                  >
+                    <Avatar className="w-20 h-20 border-4 border-orange-100">
+                      <AvatarImage
+                        src={viewingCustomer.image ? `${import.meta.env.VITE_API_BASE_IMAGE_URL}/${viewingCustomer.image}` : "/placeholder.svg"}
+                        alt={viewingCustomer.name}
+                      />
+                      <AvatarFallback className="bg-orange-100 text-orange-600 font-bold text-2xl">
+                        {viewingCustomer.name.split(" ").map((n) => n[0]).join("").toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {viewingCustomer.image && (
+                      <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <ZoomIn className="w-8 h-8 text-white" />
+                      </div>
+                    )}
+                  </button>
+
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">{viewingCustomer.name}</h3>
+                    <p className="text-sm text-gray-500">ID: #{viewingCustomer._id}</p>
+                    <div className="mt-2">{getStatusBadge(viewingCustomer.status)}</div>
+                  </div>
+                </div>
+
+                <hr className="border-gray-100" />
+
+                <div className="grid grid-cols-1 gap-4 text-sm">
+                  <h4 className="font-semibold text-gray-700 mb-1">Contact Information</h4>
+                  <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-gray-400" /><span className="text-gray-800">{viewingCustomer.email}</span></div>
+                  <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-gray-400" /><span className="text-gray-800">{viewingCustomer.phone || "Not provided"}</span></div>
+                  <div className="flex items-center gap-3"><MapPin className="w-4 h-4 text-gray-400" /><span className="text-gray-800">{viewingCustomer.address || "Not provided"}</span></div>
+                </div>
+
+                <hr className="border-gray-100" />
+
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">System Information</h4>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    <div>
+                      <span className="text-gray-500">Customer since: </span>
+                      <span className="text-gray-800 font-medium">{formatDate(viewingCustomer.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-6 bg-gray-50 border-t border-gray-200 flex justify-end">
+                <Button 
+                  type="button" 
+                  onClick={() => setViewingCustomer(null)}
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                >
+                  Close
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* --- FULL IMAGE VIEWER DIALOG --- */}
+      <Dialog
+        open={!!imageViewerSrc}
+        onOpenChange={(isOpen) => !isOpen && setImageViewerSrc(null)}
+      >
+        <DialogContent className="max-w-2xl bg-transparent shadow-none border-none p-0">
+            {/* FIX: Added z-10 to ensure the button is always on top of the image */}
+            <Button
+              variant="ghost"
+              onClick={() => setImageViewerSrc(null)}
+              className="absolute right-2 top-2 z-10 rounded-full h-9 w-9 p-0 bg-black/40 hover:bg-black/60 text-white hover:text-white"
+            >
+              <X className="h-5 w-5" />
+              <span className="sr-only">Close</span>
+            </Button>
+            <img 
+              src={imageViewerSrc} 
+              alt="Customer full-size" 
+              className="w-full h-auto max-h-[85vh] object-contain rounded-lg" 
+            />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

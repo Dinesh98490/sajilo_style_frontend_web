@@ -18,15 +18,15 @@ import {
 } from "./Dialog"
 import { Edit3, Trash2, Search, User, Mail, Phone, Calendar, Eye } from "lucide-react"
 
-export default function CustomerTable({ customers, onEdit, onDelete }) {
+// 1. Accept the 'onView' prop here
+export default function CustomerTable({ customers, onEdit, onDelete, onView }) {
   const [searchTerm, setSearchTerm] = useState("")
-  console.log(customers)
 
   const filteredCustomers = customers.filter(
     (customer) =>
       customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone.includes(searchTerm),
+      (customer.phone && customer.phone.includes(searchTerm)), // Added a check for customer.phone
   )
 
   const formatDate = (dateString) => {
@@ -117,13 +117,13 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
                           alt={customer.name}
                         />
                         {!customer.image && (
-                          <><AvatarFallback className="bg-orange-100 text-orange-600 font-semibold">
+                          <AvatarFallback className="bg-orange-100 text-orange-600 font-semibold">
                           {customer.name
                             .split(" ")
                             .map((n) => n[0])
                             .join("")
                             .toUpperCase()}
-                        </AvatarFallback></>
+                        </AvatarFallback>
                         )}
                           
                         </Avatar>
@@ -141,7 +141,7 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <Phone className="w-3 h-3 text-gray-400" />
-                          <span className="text-gray-600">{customer.phone}</span>
+                          <span className="text-gray-600">{customer.phone || 'N/A'}</span>
                         </div>
                       </div>
                     </TableCell>
@@ -151,15 +151,16 @@ export default function CustomerTable({ customers, onEdit, onDelete }) {
                     </TableCell>
                     <TableCell className="py-5">
                       <div className="flex items-center justify-center gap-2">
+                        {/* 2. Add the onClick handler to call the onView prop with the current customer */}
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => onView(customer)}
                           className="h-9 w-9 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        {/* Change #2: Call `onEdit` and pass the entire `customer` object */}
                         <Button
                           variant="ghost"
                           size="sm"
