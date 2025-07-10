@@ -91,7 +91,7 @@ function ProfileOptions({ username = "User", avatarUrl }) {
           onClick={() => {
             localStorage.removeItem("token");
             localStorage.removeItem("userid");
-            window.location.href = "/login";
+            window.location.href = "/";
           }}
           className="text-red-500 hover:bg-red-100"
         >
