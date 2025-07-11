@@ -9,9 +9,14 @@ import AdminLayout from "../layouts/adminLayout";
 import ProductPage from '../pages/productPage';
 import CustomerPage from '../pages/CustomerPage';
 import OrderPage from '../pages/OrderPage';
-
 import ProtectedRoute from './adminGuard';
 import ProductDetailsPage from '../pages/ProductDetailsPage';
+import CartPage from '../pages/CartPage';
+// import ForgotPasswordPage from '../pages/ForgetPasswordPage';
+// import RequestPasswordRestPage from '../pages/ResetPasswordPage';
+// import ResetPasswordPage from '../pages/ResetPasswordPage';
+import RequestResetPasswordPage from '../pages/RequestResetPasswordPage';
+import ResetPasswordPage from '../pages/ResetPasswordPage';
 
 
 
@@ -23,10 +28,12 @@ export const router = createBrowserRouter([
       { path: "/", element: <LandingPage /> },
       { path: "/signup", element: <SignupPage /> },
       { path: "/login", element: <LoginPage /> },
-      // {path: "/product-details", element:<ProductDetailsPage/>},
-      // {path: "/productdetails", element: <ProductDetailsPage/>}
-      { path: "/productdetails/:id", element: <ProductDetailsPage /> }
-    
+      // {path: "/forgetpassword", element: <ForgotPasswordPage/>},
+      {path: "/customer/cart", element: <CartPage/>},
+      { path: "/productdetails/:id", element: <ProductDetailsPage /> },
+
+      {path: "/request-reset-password",element:<RequestResetPasswordPage/>},
+      {path: "/reset-password/:token",element:<ResetPasswordPage/>},
       
     ],
   },
@@ -46,26 +53,5 @@ export const router = createBrowserRouter([
   },
 ]);
 
-
-// {
-//   element: <ProtectedRoute requiredRole="Admin">
-//     <AdminLayout />
-//   </ProtectedRoute>, // Admin layout for admin dashboard routes
-//   children: [
-//     { path: "/admin/dashboard", element: <AdminDashboard /> }, 
-//     { path: "/admin/products", element: <ProductManagement/> },
-//     { path: "/admin/orders", element: <OrderManagement/>},
-//     { path: "/admin/users", element: <UserManagement/> },
-//     { path: "/admin/inventory", element: <InventoryManagement/> },
-//     { path: "/admin/payments", element: <PaymentManagement/> },
-//     { path: "/admin/reports", element: <ReportingDashboard/> },
-//     { path: "/admin/delivery", element: <DeliveryManagement/> },
-//     { path: "/admin/add-category", element: <AddCategoriesPage/> },
-//     { path: "/admin/add-subcategory", element: <AddSubcategoryManagement/> },
-//     { path: "/admin/add-brands", element: <AddBrandManagement/> },
-//     { path: "/admin/settings", element: <SettingsPage/> },
-    
-//   ],
-// },
 
 

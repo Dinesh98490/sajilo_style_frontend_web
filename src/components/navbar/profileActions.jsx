@@ -2,8 +2,7 @@ import React from "react";
 import { Search, Heart, ShoppingBag, Menu } from "lucide-react";
 import { Link, data, useNavigate } from "react-router-dom";
 import { IMAGE_PATHS } from "../../common/imageConstant";
-import { useGetCustomer } from "../../hooks/admin/usecustomer/customerHooks"; 
-
+import { useGetCustomer } from "../../hooks/admin/usecustomer/customerHooks";
 
 // --- Avatar UI ---
 function Avatar({ src, fallback, alt }) {
@@ -65,12 +64,14 @@ function ProfileOptions({ username = "User", avatarUrl }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center space-x-2 cursor-pointer hover:opacity-90">
-        <Avatar
+          <Avatar
             src="https://github.com/shadcn.png"
             fallback="UN"
             alt="User"
           />
-          <span className="font-semibold text-sm hidden md:block">{username}</span>
+          <span className="font-semibold text-sm hidden md:block">
+            {username}
+          </span>
         </div>
       </DropdownMenuTrigger>
 
@@ -78,13 +79,19 @@ function ProfileOptions({ username = "User", avatarUrl }) {
         <DropdownMenuItem onClick={() => (window.location.href = "/")}>
           Home
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => (window.location.href = "/order-history")}>
+        <DropdownMenuItem
+          onClick={() => (window.location.href = "/order-history")}
+        >
           Order History
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => (window.location.href = "/payment-history")}>
+        <DropdownMenuItem
+          onClick={() => (window.location.href = "/payment-history")}
+        >
           Payment History
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => (window.location.href = "/change-password")}>
+        <DropdownMenuItem
+          onClick={() => (window.location.href = "/change-password")}
+        >
           Change Password
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -102,17 +109,14 @@ function ProfileOptions({ username = "User", avatarUrl }) {
   );
 }
 
-
 // --- Main Navbar ---
 export default function Navbar() {
   const authnavigate = useNavigate();
   const token = localStorage.getItem("token");
   const customerId = localStorage.getItem("userid");
-  console.log(customerId)
-const { data: customerData, isLoading } = useGetCustomer(customerId);
-console.log(customerData?.data.fullName
-  )
-
+  console.log(customerId);
+  const { data: customerData, isLoading } = useGetCustomer(customerId);
+  console.log(customerData?.data.fullName);
 
   const handleLoginClick = () => {
     if (!token) {
@@ -143,40 +147,64 @@ console.log(customerData?.data.fullName
 
       {/* Navigation Links */}
       <nav className="hidden md:flex items-center space-x-8">
-        <Link to="/" className="text-sm font-medium text-gray-800 hover:text-orange-500 transition-colors">
+        <Link
+          to="/"
+          className="text-sm font-medium text-gray-800 hover:text-orange-500 transition-colors"
+        >
           Home
         </Link>
-        <Link to="/man" className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
+        <Link
+          to="/man"
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+        >
           Man
         </Link>
-        <Link to="/women" className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
+        <Link
+          to="/women"
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+        >
           Women
         </Link>
-        <Link to="/kids" className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
+        <Link
+          to="/kids"
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+        >
           Kids
         </Link>
-        <Link to="/about-us" className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
+        <Link
+          to="/about-us"
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+        >
           About Us
         </Link>
-        <Link to="/contact-us" className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
+        <Link
+          to="/contact-us"
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+        >
           Contact Us
         </Link>
       </nav>
 
       {/* Icons and Auth Buttons */}
       <div className="flex items-center space-x-2">
-        <Link to="/search" className="hidden sm:flex p-2 hover:text-orange-500 transition-colors">
+        {/* <Link to="/search" className="hidden sm:flex p-2 hover:text-orange-500 transition-colors">
           <Search className="h-5 w-5 text-gray-800" />
           <span className="sr-only">Search</span>
-        </Link>
+        </Link> */}
 
-        <Link to="/wishlist" className="hidden sm:flex p-2 hover:text-orange-500 transition-colors">
+        <Link
+          to="/wishlist"
+          className="hidden sm:flex p-2 hover:text-orange-500 transition-colors"
+        >
           <Heart className="h-5 w-5 text-gray-800" />
           <span className="sr-only">Wishlist</span>
         </Link>
 
-        <Link to="/cart" className="p-2 hover:text-orange-500 transition-colors">
-          <ShoppingBag className="h-5 w-5 text-gray-800" />
+        <Link
+          to="/customer/cartpage"
+          className="p-2 text-gray-600 hover:text-orange-500 transition-colors"
+        >
+          <ShoppingBag className="h-5 w-5" />
           <span className="sr-only">Cart</span>
         </Link>
 
@@ -197,11 +225,9 @@ console.log(customerData?.data.fullName
           </>
         ) : (
           <ProfileOptions
-          username={customerData?.data.fullName
-            || "User"}
-          avatarUrl={`http://localhost:5050/uploads/${customerData?.profileImage}`}
-        />
-        
+            username={customerData?.data.fullName || "User"}
+            avatarUrl={`http://localhost:5050/uploads/${customerData?.profileImage}`}
+          />
         )}
       </div>
     </header>
