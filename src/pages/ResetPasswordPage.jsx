@@ -1,12 +1,25 @@
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useResetPassword } from "../hooks/useLoginUser";
-import { Lock, X } from "lucide-react";
+import { Lock, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
+/**
+ * A professional and user-friendly "Reset Password" page, styled consistently
+ * with the "Forgot Password" flow. Features a clean white background, an orange theme,
+ * and clear states for loading, success, and error.
+ */
 export default function ResetPasswordPage() {
   const { token } = useParams();
   const navigate = useNavigate();
+
+  // States for a better user experience
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [apiError, setApiError] = useState(null);
+
+  // Your original hook call remains the same
   const resetPassword = useResetPassword();
 
   const formik = useFormik({
@@ -19,107 +32,148 @@ export default function ResetPasswordPage() {
         .min(6, "Password must be at least 6 characters")
         .required("Password is required"),
       confirmPassword: Yup.string()
-        .oneOf([Yup.ref("password"), null], "Passwords must match")
-        .required("Confirm Password is required"),
+        .oneOf([Yup.ref("password")], "Passwords must match")
+        .required("Please confirm your new password"),
     }),
     onSubmit: (values) => {
+      setIsLoading(true);
+      setApiError(null);
       resetPassword.mutate(
         { password: values.password, token },
         {
           onSuccess: () => {
-            navigate("/login");
+            setIsSuccess(true); // Show success screen
           },
           onError: (error) => {
-            alert(error?.message || "❌ Error resetting password. Try again.");
+            const errorMessage = error.response?.data?.message || "An error occurred. Please try again.";
+            setApiError(errorMessage);
             console.error("Reset error:", error);
+          },
+          onSettled: () => {
+            setIsLoading(false); // Stop loading state
           },
         }
       );
-    }
+    },
   });
 
-  const handleCancel = () => navigate("/login");
+  // --- Success View ---
+  if (isSuccess) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl border border-gray-100">
+          <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
+          <h2 className="mt-6 text-2xl font-bold text-gray-800">Password Reset!</h2>
+          <p className="mt-2 text-gray-600">
+            Your password has been changed successfully. You can now log in with your new password.
+          </p>
+          <button
+            onClick={() => navigate("/login")}
+            className="mt-8 inline-flex w-full items-center justify-center rounded-lg bg-orange-500 px-6 py-3 font-semibold text-white transition-all duration-300 hover:bg-orange-600"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
+  // --- Main Form View ---
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-      <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl relative animate-fade-in">
-        {/* Close button */}
-        <button
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          onClick={handleCancel}
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="flex min-h-screen w-full items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl border border-gray-100">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-800">Set New Password</h1>
+          <p className="mt-2 text-gray-500">
+            Create a strong new password for your account.
+          </p>
+        </div>
 
-        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-          🔒 Reset Password
-        </h2>
-        <p className="text-sm text-gray-500 mb-6">
-          Enter your new password below.
-        </p>
+        <form onSubmit={formik.handleSubmit} className="mt-8 space-y-6">
+          {apiError && (
+            <div className="rounded-md bg-red-50 p-4 text-center text-sm font-medium text-red-700">
+              {apiError}
+            </div>
+          )}
 
-        <form onSubmit={formik.handleSubmit} className="space-y-5">
-          {/* Password Field */}
+          {/* New Password Field */}
           <div>
-            <label htmlFor="password" className="text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
               New Password
             </label>
-            <div className="mt-1 flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-yellow-400">
-              <Lock className="w-5 h-5 text-gray-400" />
+            <div className="relative">
+              <Lock className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
-                type="password"
                 id="password"
                 name="password"
-                className="ml-2 w-full outline-none text-gray-700 placeholder-gray-400"
+                type="password"
                 placeholder="Enter new password"
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 value={formik.values.password}
+                className={`block w-full rounded-lg border bg-gray-50 py-3 pl-10 pr-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  formik.touched.password && formik.errors.password
+                    ? "border-red-500 ring-red-500"
+                    : "border-gray-300 focus:ring-orange-500"
+                }`}
+                disabled={isLoading}
               />
             </div>
             {formik.touched.password && formik.errors.password && (
-              <p className="text-red-500 text-sm mt-1">{formik.errors.password}</p>
+              <p className="mt-1.5 text-sm text-red-600">{formik.errors.password}</p>
             )}
           </div>
 
           {/* Confirm Password Field */}
           <div>
-            <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-              Confirm Password
+            <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-gray-700">
+              Confirm New Password
             </label>
-            <div className="mt-1 flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-yellow-400">
-              <Lock className="w-5 h-5 text-gray-400" />
+            <div className="relative">
+              <Lock className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
-                type="password"
                 id="confirmPassword"
                 name="confirmPassword"
-                className="ml-2 w-full outline-none text-gray-700 placeholder-gray-400"
+                type="password"
                 placeholder="Confirm new password"
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 value={formik.values.confirmPassword}
+                className={`block w-full rounded-lg border bg-gray-50 py-3 pl-10 pr-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  formik.touched.confirmPassword && formik.errors.confirmPassword
+                    ? "border-red-500 ring-red-500"
+                    : "border-gray-300 focus:ring-orange-500"
+                }`}
+                disabled={isLoading}
               />
             </div>
             {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">{formik.errors.confirmPassword}</p>
+              <p className="mt-1.5 text-sm text-red-600">{formik.errors.confirmPassword}</p>
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-between mt-6">
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="px-4 py-2 rounded-lg text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-lg text-sm bg-yellow-500 hover:bg-yellow-600 text-black font-semibold transition"
-            >
-              Reset Password
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="inline-flex w-full items-center justify-center rounded-lg bg-orange-500 px-6 py-3 font-semibold text-white shadow-sm transition-all duration-300 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <span>Resetting...</span>
+              </>
+            ) : (
+              "Reset Password"
+            )}
+          </button>
         </form>
+
+        <p className="mt-8 text-center text-sm text-gray-500">
+          <Link to="/login" className="inline-flex items-center gap-1 font-semibold text-orange-500 hover:text-orange-400">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Login
+          </Link>
+        </p>
       </div>
     </div>
   );
