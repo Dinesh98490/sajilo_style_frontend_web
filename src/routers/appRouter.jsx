@@ -30,6 +30,7 @@ export const router = createBrowserRouter([
       { path: "/login", element: <LoginPage /> },
       // {path: "/forgetpassword", element: <ForgotPasswordPage/>},
       {path: "/customer/cart", element: <CartPage/>},
+      {path: "/customer/cartpage", element: <CartPage/>},
       { path: "/productdetails/:id", element: <ProductDetailsPage /> },
 
       {path: "/request-reset-password",element:<RequestResetPasswordPage/>},

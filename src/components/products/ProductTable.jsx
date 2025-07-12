@@ -10,17 +10,16 @@ import { useGetProducts } from "../../hooks/admin/useProduct/productHooks";
 
 
 
-export default function ProductTable({ onEdit, onDelete, onView }) {
-  const { data: fetchProducts = []} = useGetProducts()
-  console.log(fetchProducts);
+export default function ProductTable({ products = [], onEdit, onDelete, onView }) {
   const [searchTerm, setSearchTerm] = useState("");
-  console.log(fetchProducts)
 
-  const filteredProducts = fetchProducts.filter(
-    (product) =>
-      product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (product.category?.name && product.category.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProducts = Array.isArray(products)
+    ? products.filter(
+        (product) =>
+          product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (product.category?.name && product.category.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : [];
 
   
 
@@ -92,7 +91,7 @@ export default function ProductTable({ onEdit, onDelete, onView }) {
                     <TableCell>
                       <Badge variant="outline">{product.categoryId?.title || "N/A"}</Badge>
                     </TableCell>
-                    <TableCell className="font-medium">${product.price.toFixed(2)}</TableCell>
+                    <TableCell className="font-medium">${Number(product.price).toFixed(2)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div

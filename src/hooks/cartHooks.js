@@ -10,12 +10,12 @@ import {
 } from "../services/cartService";
 
 // 🔹 Get All Carts
-export const useGetCarts = () => {
+export const useGetCarts = (data) => {
   return useQuery({
     queryKey: ["carts"],
     queryFn: async () => {
-      const res = await useGetCartsService();
-      return res.data.data;
+      const res = await useGetCartsService(data);
+      return res;
     },
   });
 };

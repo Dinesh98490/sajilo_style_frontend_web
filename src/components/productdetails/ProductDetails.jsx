@@ -277,19 +277,28 @@ import {
   CardContent,
 } from "../landingpagecomponents/herosection/ui/card";
 import Separator from "./Seperator";
+import { useCreateCart } from "../../hooks/cartHooks";
+import { useContext } from "react";
+import { AuthContext } from "../../auth/authProvider";
 
 const availableColors = ["Navy Blue", "Black", "White", "Gray", "Red"];
 const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const navigate = useNavigate(); // INITIALIZE useNavigate
-
+  const navigate = useNavigate(); 
+  const { isAuthenticated } = useContext(AuthContext);
+  const userid=localStorage.getItem("userid")
+  const token=localStorage.getItem("token")
+  console.log(userid,token)
   const [productData, setProductData] = useState(null);
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const {
+    mutate
+  }=useCreateCart()
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -309,16 +318,34 @@ export default function ProductDetails() {
 
   // Handler function for adding to cart and then navigating
   const handleAddToCart = () => {
-    // In a real application, you would dispatch an action to update global state or send an API request here.
-    console.log("Adding item to cart:", {
-      id: productData._id,
-      color: selectedColor,
-      size: selectedSize,
-      quantity,
-    });
+    console.log("Authentication status:", isAuthenticated);
+    console.log("Token:", token);
+    console.log("User ID:", userid);
+    
+    if (!isAuthenticated) {
+      // Redirect to login if not authenticated
+      navigate("/login");
+      return;
+    }
+    
+    if (!token) {
+      console.error("No token found");
+      navigate("/login");
+      return;
+    }
+    
+    mutate({
+      // "user_id":userid,
+      "product_id": productData._id,
+      "total_price": productData.price,
+      "total_product": quantity,
+      "discount":10,
+    })
+
+
 
     
-    navigate("/customer/cartpage");
+    navigate("/customer/cart");
   };
 
   const handleWishlist = () => {

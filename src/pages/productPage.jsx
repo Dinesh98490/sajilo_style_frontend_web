@@ -21,7 +21,11 @@ export default function ProductPage() {
   const [viewingProduct, setViewingProduct] = useState(null);
 
   const { data: productsData, isLoading, error: queryError } = useGetProducts();
-  const products = Array.isArray(productsData?.data) ? productsData.data : [];
+  const products = Array.isArray(productsData)
+    ? productsData
+    : Array.isArray(productsData?.data)
+      ? productsData.data
+      : [];
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
@@ -62,11 +66,6 @@ export default function ProductPage() {
     setViewingProduct(product);
   };
 
-  const runningShoes = products.filter(p => p.category?.name === "Running Shoes");
-  const casualShoes = products.filter(p => p.category?.name === "Casual Shoes");
-  const formalShoes = products.filter(p => p.category?.name === "Formal Shoes");
-  const sportsShoes = products.filter(p => p.category?.name === "Sports Shoes");
-
   if (isLoading) return <div className="p-8 text-center">Loading products...</div>;
   if (queryError) return <div className="p-8 text-center text-red-500">Error: {queryError.message}</div>;
 
@@ -93,19 +92,7 @@ export default function ProductPage() {
           </div>
         )}
 
-        <Tabs defaultValue="running" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white border-2 border-orange-200 p-1 rounded-xl shadow-lg">
-            <TabsTrigger value="running" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Running</TabsTrigger>
-            <TabsTrigger value="casual" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Casual</TabsTrigger>
-            <TabsTrigger value="formal" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Formal</TabsTrigger>
-            <TabsTrigger value="sports" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Sports</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="running"><ProductTable products={runningShoes} onView={handleViewClick} onEdit={handleEditClick} onDelete={handleDeleteProduct} /></TabsContent>
-          <TabsContent value="casual"><ProductTable products={casualShoes} onView={handleViewClick} onEdit={handleEditClick} onDelete={handleDeleteProduct} /></TabsContent>
-          <TabsContent value="formal"><ProductTable products={formalShoes} onView={handleViewClick} onEdit={handleEditClick} onDelete={handleDeleteProduct} /></TabsContent>
-          <TabsContent value="sports"><ProductTable products={sportsShoes} onView={handleViewClick} onEdit={handleEditClick} onDelete={handleDeleteProduct} /></TabsContent>
-        </Tabs>
+        <ProductTable products={products} onView={handleViewClick} onEdit={handleEditClick} onDelete={handleDeleteProduct} />
       </main>
 
       <ProductFormModal

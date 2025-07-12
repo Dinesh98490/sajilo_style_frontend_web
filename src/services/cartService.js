@@ -10,9 +10,10 @@ import {
 } from "../api/cartApi";
 
 // ✅ Fetch all carts
-export const useGetCartsService = async () => {
+export const useGetCartsService = async (data) => {
   try {
-    const res = await getCartApi();
+    const res = await getCartApi(data);
+    console.log(res.data.data)
     return res.data.data;
   } catch (err) {
     throw err.response?.data || { message: "Fetching carts failed" };
@@ -29,9 +30,13 @@ export const useGetCartByIdService = (id) => {
 // ✅ Create a new cart
 export const useCreateCartService = async (formData) => {
   try {
+    console.log("Creating cart with data:", formData);
     const res = await createCartApi(formData);
+    console.log("Cart creation response:", res);
     return res.data;
   } catch (err) {
+    console.error("Cart creation error:", err);
+    console.error("Error response:", err.response);
     throw err.response?.data || { message: "Creating cart failed" };
   }
 };
@@ -47,11 +52,11 @@ export const useUpdateCartService = () => {
 };
 
 // ✅ Delete a cart
-export const useDeleteCartService = () => {
-  const queryClient = useQueryClient();
-  return useMutation(deleteCartApi, {
-    onSuccess: () => {
-      queryClient.invalidateQueries(["carts"]);
-    },
-  });
+export const useDeleteCartService = async (id) => {
+  try {
+    const res = await deleteCartApi(id);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || { message: "Deleting cart failed" };
+  }
 };

@@ -29,6 +29,10 @@ const validationSchema = Yup.object({
   price: Yup.number()
     .positive("Price must be a positive number.")
     .required("Price is required."),
+  quantity: Yup.number()
+    .integer("Quantity must be an integer.")
+    .min(0, "Quantity cannot be negative.")
+    .required("Quantity is required."),
   image: Yup.mixed()
     .nullable() 
     .required("An image is required.")
@@ -73,6 +77,7 @@ export default function ProductFormModal({
     title: initialData?.title || "",
     desc: initialData?.desc || "",
     price: initialData?.price || "",
+    quantity: initialData?.quantity || 0,
     image: initialData?.imageUrl || null, // FIX: Use imageUrl from data
     color: initialData?.color || "",
     size: initialData?.size || "",
@@ -86,6 +91,7 @@ export default function ProductFormModal({
     formData.append("title", values.title);
     formData.append("desc", values.desc);
     formData.append("price", values.price);
+    formData.append("quantity", values.quantity);
     formData.append("color", values.color);
     formData.append("size", values.size);
     formData.append("categoryId", values.categoryId);
@@ -186,6 +192,11 @@ export default function ProductFormModal({
                         <Label htmlFor="price">Price ($) <span className="text-orange-500">*</span></Label>
                         <Field id="price" name="price" type="number" as={Input} className={`h-12 border-2 ${touched.price && errors.price && "border-red-400"}`}/>
                         <FormError name="price" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quantity">Quantity <span className="text-orange-500">*</span></Label>
+                        <Field id="quantity" name="quantity" type="number" as={Input} className={`h-12 border-2 ${touched.quantity && errors.quantity && "border-red-400"}`}/>
+                        <FormError name="quantity" />
                       </div>
                     </div>
                     <div className="space-y-2 mt-6">

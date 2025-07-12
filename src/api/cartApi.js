@@ -1,8 +1,13 @@
-import axios  from "../api/api";
-// Get all carts
+import axios from "../api/api";
+
+// export const getCartApi = (data) => {
+//   return axios.get("/customer/cart",data);
+// };
+
 export const getCartApi = () => {
   return axios.get("/customer/cart");
 };
+
 
 // Get cart by ID
 export const getCartByIdApi = (id) => {

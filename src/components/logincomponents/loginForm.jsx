@@ -103,14 +103,18 @@ export function LoginForm() {
       { email, password },
       {
         onSuccess: (res) => {
-          console.log(res)
+          console.log("Login response:", res);
           const role = res?.data?.role;
           const token = res?.token;
           const userData = res?.data;
 
+          console.log("Token:", token);
+          console.log("Role:", role);
+          console.log("User data:", userData);
 
           console.log(role)
           localStorage.setItem("userid",res.data._id)
+          localStorage.setItem("token",token)
           localStorage.setItem('role', role)
           if (!role || !token) {
             toast.error("Invalid login response");
