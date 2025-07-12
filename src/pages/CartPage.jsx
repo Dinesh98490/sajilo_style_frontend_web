@@ -1,10 +1,7 @@
-
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Minus, Plus, ShoppingCart, Trash2, X, Lock, HandCoins, Loader2 } from "lucide-react";
-import { useGetCarts } from "../hooks/cartHooks";
-import { useDeleteCart } from "../hooks/cartHooks";
-import { useUpdateCart } from "../hooks/cartHooks";
+import { useNavigate } from "react-router-dom";
+import { Minus, Plus, ShoppingCart, Trash2, X, Loader2 } from "lucide-react";
+import { useGetCarts, useDeleteCart, useUpdateCart } from "../hooks/cartHooks";
 import CryptoJS from "crypto-js";
 import { v4 as uuidv4 } from "uuid";
 import { useQueryClient } from "@tanstack/react-query";
@@ -25,7 +22,6 @@ export default function CartPage() {
   const { mutate: deleteCartItem, isLoading: isDeleting } = useDeleteCart();
   const { mutate: updateCartItem, isLoading: isUpdating } = useUpdateCart();
   const [deletingId, setDeletingId] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null);
   const [localCartItems, setLocalCartItems] = useState([]);
 
   useEffect(() => {
@@ -76,21 +72,17 @@ export default function CartPage() {
   const total = subtotal + shipping + tax;
 
   const handleEsewaPayment = () => {
+    const transaction_uuid = uuidv4();
+    const product_code = "EPAYTEST";
+    const total_amount = total.toFixed(2);
+    const signed_field_names = "total_amount,transaction_uuid,product_code";
+    const signingString = `total_amount=${total_amount},transaction_uuid=${transaction_uuid},product_code=${product_code}`;
+    const secret = "8gBm/:&EnhH.1/q"; // For testing only
 
-  
-    const transaction_uuid = uuidv4(); // or use uuid v4 if required
-    console.log(transaction_uuid)
-    const product_code = "EPAYTEST"
-    const total_amount = total.toFixed(2) // You must match this exactly as in the string
-    const signed_field_names = "total_amount,transaction_uuid,product_code"
-  
-    const signingString = `total_amount=${total_amount},transaction_uuid=${transaction_uuid},product_code=${product_code}`
-    const secret = "8gBm/:&EnhH.1/q" // ← UAT secret key from eSewa. DO NOT USE IN PRODUCTION FRONTEND.
-  
-    const signature = CryptoJS.HmacSHA256(signingString, secret).toString(CryptoJS.enc.Base64)
-  
+    const signature = CryptoJS.HmacSHA256(signingString, secret).toString(CryptoJS.enc.Base64);
+
     const fields = {
-      amount: total.toFixed(2),
+      amount: total_amount,
       tax_amount: "0",
       total_amount: total_amount,
       transaction_uuid: transaction_uuid,
@@ -101,23 +93,23 @@ export default function CartPage() {
       failure_url: "https://developer.esewa.com.np/failure",
       signed_field_names: signed_field_names,
       signature: signature,
-    }
-  
-    const form = document.createElement("form")
-    form.setAttribute("method", "POST")
-    form.setAttribute("action", "https://rc-epay.esewa.com.np/api/epay/main/v2/form")
-  
+    };
+
+    const form = document.createElement("form");
+    form.setAttribute("method", "POST");
+    form.setAttribute("action", "https://rc-epay.esewa.com.np/api/epay/main/v2/form");
+
     Object.entries(fields).forEach(([key, value]) => {
-      const input = document.createElement("input")
-      input.setAttribute("type", "hidden")
-      input.setAttribute("name", key)
-      input.setAttribute("value", value)
-      form.appendChild(input)
-    })
-  
-    document.body.appendChild(form)
-    form.submit()
-  }
+      const input = document.createElement("input");
+      input.setAttribute("type", "hidden");
+      input.setAttribute("name", key);
+      input.setAttribute("value", value);
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+  };
 
   const handlePlaceOrder = async (paymentMethod) => {
     const userId = "60d0fe4f5311236168a109ca";
@@ -133,17 +125,13 @@ export default function CartPage() {
       payment_method: paymentMethod,
     };
     try {
-      console.log("Creating order with payload:", orderPayload);
       setIsModalOpen(false);
       alert(`Order placed successfully via ${paymentMethod}!`);
       navigate('/order-success');
     } catch (error) {
-      console.error("Failed to place order:", error);
       alert("Error placing order. Please try again.");
     }
   };
-
-  const buttonBaseClasses = "inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 disabled:opacity-50 disabled:pointer-events-none";
 
   if (isLoading) return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin h-10 w-10 text-orange-500" /></div>;
   if (isError) return <div className="text-center p-10 text-red-600">Failed to load cart</div>;
@@ -175,7 +163,7 @@ export default function CartPage() {
                     <span>{item.total_product}</span>
                     <button onClick={() => updateQuantity(item._id, item.total_product + 1)} className="border px-2">+</button>
                   </div>
-                  <p className="text-lg font-bold">${item.total_price?.toFixed(2)}</p>
+                  <p className="text-lg font-bold">Rs. {item.total_price?.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -185,13 +173,13 @@ export default function CartPage() {
           <div className="bg-white p-6 rounded-xl shadow-lg space-y-4">
             <h2 className="text-2xl font-bold">Order Summary</h2>
             <div className="space-y-1">
-              <div className="flex justify-between"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span>Shipping</span><span>${shipping.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span>Tax</span><span>${tax.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>Subtotal</span><span>Rs. {subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>Shipping</span><span>Rs. {shipping.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>Tax</span><span>Rs. {tax.toFixed(2)}</span></div>
             </div>
             <hr />
             <div className="flex justify-between text-lg font-bold">
-              <span>Total</span><span>${total.toFixed(2)}</span>
+              <span>Total</span><span>Rs. {total.toFixed(2)}</span>
             </div>
             <button onClick={() => setIsModalOpen(true)} className="w-full py-3 bg-orange-500 text-white font-bold rounded-lg">Proceed to Checkout</button>
           </div>
@@ -203,7 +191,7 @@ export default function CartPage() {
           <div className="bg-white p-8 rounded-xl relative w-full max-w-md">
             <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 text-gray-500"><X /></button>
             <h3 className="text-2xl font-bold text-center mb-4">Confirm Your Order</h3>
-            <div className="text-center text-3xl font-bold mb-6">${total.toFixed(2)}</div>
+            <div className="text-center text-3xl font-bold mb-6">Rs. {total.toFixed(2)}</div>
             <button onClick={() => handlePlaceOrder('COD')} className="w-full py-3 border rounded-lg mb-4">Cash on Delivery</button>
             <button onClick={handleEsewaPayment} className="w-full py-3 rounded-lg text-white flex justify-center items-center gap-2" style={{ backgroundColor: '#60BB46' }}>
               <ESewaLogo /><span>Pay with eSewa</span>
@@ -214,3 +202,4 @@ export default function CartPage() {
     </div>
   );
 }
+
