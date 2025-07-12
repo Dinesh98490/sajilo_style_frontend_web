@@ -1,43 +1,80 @@
-import React from "react";
+import React, { useState, createContext, useContext } from "react";
+import ReactDOM from "react-dom";
 
-export function Dialog({ open, onOpenChange, children }) {
-  if (!open) return null;
+const DialogContext = createContext();
+
+export function AlertDialog({ children }) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={() => onOpenChange(false)}
-    >
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg" onClick={e => e.stopPropagation()}>
-        {children}
-      </div>
-    </div>
+    <DialogContext.Provider value={{ open, setOpen }}>
+      {children}
+    </DialogContext.Provider>
   );
 }
 
-export function DialogContent({ children, className = "" }) {
-  return <div className={`p-6 ${className}`}>{children}</div>;
+export function AlertDialogTrigger({ children, asChild = false }) {
+  const { setOpen } = useContext(DialogContext);
+
+  return asChild
+    ? React.cloneElement(children, {
+        onClick: () => setOpen(true),
+      })
+    : <button onClick={() => setOpen(true)}>{children}</button>;
 }
 
-export function DialogHeader({ children }) {
+export function AlertDialogContent({ children, className = "" }) {
+  const { open, setOpen } = useContext(DialogContext);
+  if (!open) return null;
+
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className={`bg-white rounded-lg p-6 shadow-xl w-full max-w-lg ${className}`}>
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+export function AlertDialogHeader({ children }) {
   return <div className="mb-4">{children}</div>;
 }
 
-export function DialogTitle({ children }) {
-  return <h2 className="text-lg font-semibold">{children}</h2>;
+export function AlertDialogFooter({ children }) {
+  return <div className="mt-6 flex justify-end gap-3">{children}</div>;
 }
 
-export function DialogDescription({ children }) {
-  return <p className="text-sm text-gray-600">{children}</p>;
+export function AlertDialogTitle({ children, className = "" }) {
+  return <h2 className={`text-lg font-semibold ${className}`}>{children}</h2>;
 }
 
-// Add this DialogFooter component:
-export function DialogFooter({ children }) {
+export function AlertDialogDescription({ children }) {
+  return <p className="text-gray-600 mt-2">{children}</p>;
+}
+
+export function AlertDialogCancel({ children, className = "" }) {
+  const { setOpen } = useContext(DialogContext);
   return (
-    <div className="mt-6 flex justify-end gap-3">
+    <button
+      onClick={() => setOpen(false)}
+      className={`px-4 py-2 rounded-md border ${className}`}
+    >
       {children}
-    </div>
+    </button>
+  );
+}
+
+export function AlertDialogAction({ children, onClick, className = "" }) {
+  const { setOpen } = useContext(DialogContext);
+  const handleClick = () => {
+    if (onClick) onClick();
+    setOpen(false);
+  };
+
+  return (
+    <button onClick={handleClick} className={`px-4 py-2 rounded-md ${className}`}>
+      {children}
+    </button>
   );
 }

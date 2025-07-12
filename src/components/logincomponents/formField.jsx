@@ -59,6 +59,12 @@ export function FormFields({ email, setEmail, password, setPassword }) {
           </button>
         </div>
       </motion.div>
+
+      
+
+      
     </>
   );
 }
+
+

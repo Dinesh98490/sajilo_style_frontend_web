@@ -11,6 +11,8 @@ export const IMAGE_PATHS = {
     sale4: "/assets/images/sale4.png",
     aboutus:"/assets/images/aboutus.png",
     logo:"/assets/images/logo.png",
+    
+
 
        
   };

@@ -2,10 +2,13 @@ import { Eye, EyeOff, Mail, Phone, User } from "lucide-react"
 import { motion } from "framer-motion"
 import { useState } from "react"
 import { useRegisterUserTan } from "../../hooks/useRegisterUserTan"
+
+
 import { toast } from "react-toastify"
 
 export function FormFields() {
   const [showPassword, setShowPassword] = useState(false)
+  
 
   const [form, setForm] = useState({
     fullName: '',
@@ -145,3 +148,4 @@ export function FormFields() {
     </form>
   )
 }
+

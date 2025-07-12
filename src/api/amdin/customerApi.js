@@ -1,32 +1,22 @@
 import axios from "../api";
 
-// 👉 Create a customer (with image)
-export const createCustomerApi = async (formData) => {
-  return await axios.post(BASE_URL, formData, {
+//  Create a new order
+export const postCustomerApi = (params) => axios.post("/admin/customer", params,{
     headers: { "Content-Type": "multipart/form-data" },
-  });
-};
+});
 
-// 👉 Get all customers
-export const getAllCustomersApi = async () => {
-  const response = await axios.get(BASE_URL);
-  return response.data.data;
-};
+// Get all orders
+export const getAllCustomerApi = () => axios.get("/admin/customer");
 
-// 👉 Get customer by ID
-export const getCustomerByIdApi = async (id) => {
-  const response = await axios.get(`${BASE_URL}/${id}`);
-  return response.data;
-};
 
-// 👉 Update customer (with image)
-export const updateCustomerApi = async (id, formData) => {
-  return await axios.put(`${BASE_URL}/${id}`, formData, {
+//Get an order by Id
+export const getOneCustomerApi = (id) => axios.get(`/admin/user/${id}`);
+
+// Update an order by ID
+export const updateCustomerApi = (id, params) => axios.put(`/admin/customer/${id}`, params,{
     headers: { "Content-Type": "multipart/form-data" },
-  });
-};
+});
 
-// 👉 Delete customer
-export const deleteCustomerApi = async (id) => {
-  return await axios.delete(`${BASE_URL}/${id}`);
-};
+//  Delete an order by ID
+export const deleteCustomerApi = (id) => axios.delete(`/admin/customer/${id}`);
+

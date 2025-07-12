@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Navbar from "../components/navbar/navBar";
+import Navbar from "../components/navbar/profileActions";
 import Footer from '../components/footer/footer';
 
 const AppLayout = () => (
