@@ -192,16 +192,16 @@ export default function Navbar() {
           <span className="sr-only">Search</span>
         </Link> */}
 
-        <Link
+        {/* <Link
           to="/wishlist"
           className="hidden sm:flex p-2 hover:text-orange-500 transition-colors"
         >
           <Heart className="h-5 w-5 text-gray-800" />
           <span className="sr-only">Wishlist</span>
-        </Link>
+        </Link> */}
 
         <Link
-          to="/customer/cartpage"
+          to="/customer/cart"
           className="p-2 text-gray-600 hover:text-orange-500 transition-colors"
         >
           <ShoppingBag className="h-5 w-5" />
