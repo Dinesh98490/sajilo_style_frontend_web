@@ -17,7 +17,7 @@ function AdminSidebar({ activeItem, setActiveItem }) {
     { icon: Package, label: "Products", route: "/admin/product" },
     { icon: Users, label: "Customers" , route: "/admin/customer"},
     { icon: ShoppingCart, label: "Orders", route: "/admin/order" },
-    { icon: Truck, label: "Shipments" },
+    // { icon: Truck, label: "Shipments" },
     { icon: CreditCard, label: "Transactions" },
     { icon: Settings, label: "Settings" },
   ];
