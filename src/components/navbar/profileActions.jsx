@@ -1,5 +1,6 @@
 import React from "react";
 import { Search, Heart, ShoppingBag, Menu } from "lucide-react";
+import { Link as ScrollLink } from "react-scroll";
 import { Link, data, useNavigate } from "react-router-dom";
 import { IMAGE_PATHS } from "../../common/imageConstant";
 import { useGetCustomer } from "../../hooks/admin/usecustomer/customerHooks";
@@ -153,36 +154,61 @@ export default function Navbar() {
         >
           Home
         </Link>
-        <Link
-          to="/man"
-          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+        <ScrollLink
+          to="man-section"
+          spy={true}
+          smooth={true}
+          offset={-70}
+          duration={500}
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors cursor-pointer"
+          activeClass="text-orange-500"
         >
           Man
-        </Link>
-        <Link
-          to="/women"
-          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+        </ScrollLink>
+        <ScrollLink
+          to="women-section"
+          spy={true}
+          smooth={true}
+          offset={-80}
+          duration={500}
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors cursor-pointer"
+          activeClass="text-orange-500 font-bold"
         >
           Women
-        </Link>
-        <Link
-          to="/kids"
-          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+        </ScrollLink>
+        <ScrollLink
+          to="kids-section" 
+          spy={true}
+          smooth={true}
+          offset={-80}
+          duration={500}
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors cursor-pointer"
+          activeClass="text-orange-500 font-bold"
         >
           Kids
-        </Link>
-        <Link
-          to="/about-us"
-          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+        </ScrollLink>
+        <ScrollLink
+          to="about-us"
+          spy={true}
+          smooth={true}
+          offset={-70}
+          duration={500}
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors cursor-pointer"
+          activeClass="text-orange-500" // Class to apply when the link is active
         >
-          About Us
-        </Link>
-        <Link
-          to="/contact-us"
-          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+          About us
+        </ScrollLink>
+        <ScrollLink
+          to="testimonials-section" // This must match the 'name' in <Element>
+          spy={true} // Highlights the link when the section is in view
+          smooth={true} // Enables smooth scrolling animation
+          offset={-70} // Adjusts scroll position (e.g., for sticky nav)
+          duration={500} // Animation duration in milliseconds
+          className="text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors cursor-pointer"
+          activeClass="text-orange-500" // Class to apply when the link is active
         >
-          Contact Us
-        </Link>
+          Testimonials
+        </ScrollLink>
       </nav>
 
       {/* Icons and Auth Buttons */}

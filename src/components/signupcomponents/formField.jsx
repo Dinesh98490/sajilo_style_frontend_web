@@ -26,6 +26,7 @@ export function FormFields() {
   }
 
   const handleSubmit = async (e) => {
+    console.log("Register payload:", form);
     e.preventDefault()
     mutate(form, {
       onSuccess: () => {
