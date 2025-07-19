@@ -1,4 +1,5 @@
 import React from 'react';
+import { Layers, Grid, List, Box, Folder } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { IMAGE_PATHS } from '../../common/imageConstant';
 import {
@@ -17,7 +18,7 @@ function AdminSidebar({ activeItem, setActiveItem }) {
     { icon: Package, label: "Products", route: "/admin/product" },
     { icon: Users, label: "Customers" , route: "/admin/customer"},
     { icon: ShoppingCart, label: "Orders", route: "/admin/order" },
-    // { icon: Truck, label: "Shipments" },
+    { icon: Layers, label: "Categories", route: "/admin/category" }, 
     { icon: CreditCard, label: "Transactions" },
     { icon: Settings, label: "Settings" },
   ];
@@ -50,6 +51,7 @@ function AdminSidebar({ activeItem, setActiveItem }) {
             navigate("/admin/dashboard");
             navigate("/admin/product");
             navigate("/admin/customer");
+            navigate("/admin/category")
             navigate("/admin/order");
           }}
         >

@@ -15,7 +15,12 @@ import {
 export const useGetCustomerOrders = () => {
   return useQuery({
     queryKey: ["customerOrders"],
-    queryFn: getAllCustomerOrdersService,
+    queryFn: async () => {
+      console.log("Fetching orders from API...");
+      const data = await getAllCustomerOrdersService();
+      console.log("Fetched data:", data);
+      return data.data;
+    },
   });
 };
 

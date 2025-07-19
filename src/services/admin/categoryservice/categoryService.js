@@ -31,6 +31,9 @@ export const useGetCategoryByIdService = (id) => {
 export const useCreateCategoryService =  async (formData) => {
     try {
         const res = await createCategoryApi(formData);
+        toast.success(res?.data?.message || "Category created successfully");
+       
+          
         return res.data;
       } catch (err) {
         throw err.response?.data || { message: "Category creation failed" };

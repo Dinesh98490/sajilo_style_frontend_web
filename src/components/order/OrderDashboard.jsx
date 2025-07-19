@@ -1,20 +1,30 @@
-import React, { useState } from "react"
-import { OrderList } from "./OrderList" 
-import { OrderForm } from "./OrderForm"
-import { OrderStats } from "./OrderStats"
-import { Button } from "../landingpagecomponents/herosection/ui/button"
-import { Plus, Sparkles } from "lucide-react"
+import React, { useState, useEffect } from "react";
+import  OrderList  from "./OrderList";
+import { OrderForm } from "./OrderForm";
+import { Button } from "../landingpagecomponents/herosection/ui/button";
+import { Plus, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-} from "../landingpagecomponents/herosection/ui/Dialog"
+} from "../landingpagecomponents/herosection/ui/Dialog";
+import { useGetCustomerOrders } from "../../hooks/orderHooks";
 
 export function OrderDashboard({ initialOrders = [] }) {
-  const [orders, setOrders] = useState(initialOrders)
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const { data: fetchedOrders, isLoading, isError } = useGetCustomerOrders();
+  console.log(fetchedOrders)
+  const [orders, setOrders] = useState(Array.isArray(initialOrders) ? initialOrders : []);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  useEffect(() => {
+    if (Array.isArray(fetchedOrders)) {
+      setOrders(fetchedOrders);
+    } else {
+      setOrders([]);
+    }
+  }, [fetchedOrders]);
 
   const handleCreateOrder = (newOrder) => {
-    const now = Date.now()
+    const now = Date.now();
     const order = {
       ...newOrder,
       _id: now.toString(),
@@ -32,24 +42,27 @@ export function OrderDashboard({ initialOrders = [] }) {
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    }
-    setOrders([order, ...orders])
-    setIsFormOpen(false)
-  }
+    };
+    setOrders([order, ...orders]);
+    setIsFormOpen(false);
+  };
 
   const handleUpdateOrder = (orderId, updates) => {
     setOrders(
       orders.map((order) =>
         order._id === orderId
           ? { ...order, ...updates, updatedAt: new Date().toISOString() }
-          : order,
-      ),
-    )
-  }
+          : order
+      )
+    );
+  };
 
   const handleDeleteOrder = (orderId) => {
-    setOrders(orders.filter((order) => order._id !== orderId))
-  }
+    setOrders(orders.filter((order) => order._id !== orderId));
+  };
+
+  if (isLoading) return <div className="p-6">Loading orders...</div>;
+  if (isError) return <div className="p-6 text-red-600">Failed to fetch orders.</div>;
 
   return (
     <div className="container mx-auto p-6 space-y-8 bg-gradient-to-br from-orange-50 to-orange-100/50 backdrop-blur-sm rounded-xl">
@@ -67,9 +80,7 @@ export function OrderDashboard({ initialOrders = [] }) {
             </div>
           </div>
 
-          
           <div>
-            
             <Button
               onClick={() => setIsFormOpen(true)}
               className="bg-white text-orange-600 hover:bg-orange-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
@@ -78,7 +89,6 @@ export function OrderDashboard({ initialOrders = [] }) {
               New Order
             </Button>
 
-            {/* THE DIALOG ONLY WRAPS THE CONTENT THAT NEEDS TO POP UP */}
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
               <DialogContent className="max-w-5xl max-h-[95vh] p-0 bg-gradient-to-br from-white to-orange-50 border-2 border-orange-200 shadow-2xl">
                 <OrderForm
@@ -91,13 +101,12 @@ export function OrderDashboard({ initialOrders = [] }) {
         </div>
       </div>
 
-      <OrderStats orders={orders} />
-
       <OrderList
-        orders={orders}
+          orders={Array.isArray(orders) ? orders : []}
         onUpdateOrder={handleUpdateOrder}
         onDeleteOrder={handleDeleteOrder}
+        onCreateOrder={handleCreateOrder}
       />
     </div>
-  )
+  );
 }

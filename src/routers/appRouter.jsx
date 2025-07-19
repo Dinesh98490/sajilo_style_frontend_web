@@ -17,6 +17,7 @@ import CartPage from '../pages/CartPage';
 // import ResetPasswordPage from '../pages/ResetPasswordPage';
 import RequestResetPasswordPage from '../pages/RequestResetPasswordPage';
 import ResetPasswordPage from '../pages/ResetPasswordPage';
+import CategoryPage from '../pages/CategoryPage';
 
 
 
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
       {path: "/admin/product", element:<ProductPage/>},
       {path:"/admin/customer", element:<CustomerPage/>},
       {path: "/admin/order", element: <OrderPage/>},
+      {path: "/admin/category", element: <CategoryPage/>},
       
       
     ],

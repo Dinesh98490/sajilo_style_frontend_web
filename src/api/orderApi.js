@@ -1,4 +1,4 @@
-import axios from "../api";import axios from "../api";
+import axios from "./api";
 
 // Get all customer orders
 export const getCustomerOrdersApi = () => {
