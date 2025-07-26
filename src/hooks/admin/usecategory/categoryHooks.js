@@ -24,7 +24,7 @@ import {
   useDeleteCategoryService,
 } from "../../../services/admin/categoryservice/categoryService";
 
-// Hook to get all categories
+// hook to get all categories
 export const useGetCategories = () => {
   return useQuery({
     queryKey: ["categories"],  // fixed key from "customers" to "categories"
