@@ -18,7 +18,7 @@ export function CardHeader({ className = '', children, ...props }) {
   );
 }
 
-// Card Title
+// card title 
 export function CardTitle({ className = '', children, ...props }) {
   return (
     <h3 className={`text-lg font-semibold ${className}`} {...props}>
