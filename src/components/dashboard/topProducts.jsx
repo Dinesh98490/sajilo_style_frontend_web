@@ -1,6 +1,8 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent} from "../dashboard/card";
 
+
+// top products 
 function TopProducts() {
   const products = [
     {
