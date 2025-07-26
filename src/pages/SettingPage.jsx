@@ -40,7 +40,7 @@ export default function AdminAuthenticationSettings() {
     setIsSaving(true);
     setSaveMessage({ type: '', text: '' });
 
-    // Basic validation
+    // basic validations
     if (minPasswordLength < 8) {
       setSaveMessage({ type: 'error', text: 'Minimum password length must be at least 8 characters.' });
       setIsSaving(false);
