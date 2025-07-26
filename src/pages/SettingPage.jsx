@@ -6,7 +6,7 @@ export default function AdminAuthenticationSettings() {
   const [googleSsoEnabled, setGoogleSsoEnabled] = useState(false);
   const [microsoftSsoEnabled, setMicrosoftSsoEnabled] = useState(false);
 
-  // Multi-Factor Authentication (MFA) Settings
+  // multi factor authenctications
   const [mfaRequiredForAdmins, setMfaRequiredForAdmins] = useState(true);
   const [allowedMfaMethods, setAllowedMfaMethods] = useState({
     authenticatorApp: true,
