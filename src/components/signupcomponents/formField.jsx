@@ -7,6 +7,7 @@ import { useRegisterUserTan } from "../../hooks/useRegisterUserTan"
 import { toast } from "react-toastify"
 
 export function FormFields() {
+  // handle the logics of the form fields
   const [showPassword, setShowPassword] = useState(false)
   
 
