@@ -65,7 +65,7 @@ export function FormActions({ isLoading }) {
   };
 
   const handleRegister = () => {
-    navigate("/register");
+    navigate("/signup");
   };
 
   return (

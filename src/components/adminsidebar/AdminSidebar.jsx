@@ -12,15 +12,17 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import Dashboard from '../../pages/dashboard';
 
 function AdminSidebar({ activeItem, setActiveItem }) {
   const navigationItems = [
+  
     { icon: Package, label: "Products", route: "/admin/product" },
     { icon: Users, label: "Customers" , route: "/admin/customer"},
     { icon: ShoppingCart, label: "Orders", route: "/admin/order" },
     { icon: Layers, label: "Categories", route: "/admin/category" }, 
-    { icon: CreditCard, label: "Transactions" },
-    { icon: Settings, label: "Settings" },
+    // { icon: CreditCard, label: "Transactions" },
+    { icon: Settings, label: "Settings" , route: "/admin/setting"},
   ];
 
   const navigate = useNavigate();
@@ -53,6 +55,7 @@ function AdminSidebar({ activeItem, setActiveItem }) {
             navigate("/admin/customer");
             navigate("/admin/category")
             navigate("/admin/order");
+            navigate("/admin/setting")
           }}
         >
           <LayoutDashboard

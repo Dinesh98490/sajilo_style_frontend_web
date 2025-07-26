@@ -3,6 +3,8 @@ import axios from "axios";
 import { useCreateCategory } from "../hooks/admin/usecategory/categoryHooks";
 import { useUpdateCategory } from "../hooks/admin/usecategory/categoryHooks";
 import { useDeleteCategory } from "../hooks/admin/usecategory/categoryHooks";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function CategoryPage() {
   const createMutation = useCreateCategory();
@@ -42,6 +44,7 @@ export default function CategoryPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) {
+      
       alert("Title is required");
       return;
     }
@@ -49,13 +52,15 @@ export default function CategoryPage() {
     try {
       if (editingId) {
         await axios.put(`/admin/category/${editingId}`, { title, desc });
+        toast.success("Category updated successfully!");
       } else {
         await createMutation.mutateAsync({ title, desc });
+        toast.success("Category created successfully!"); 
       }
       resetForm();
       fetchCategories();
     } catch (err) {
-    //   alert("Error saving category");
+      // alert("Error saving category");
     }
   };
 
@@ -78,6 +83,7 @@ export default function CategoryPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
+      <ToastContainer position="top-center" autoClose={3000} />
       <h1 className="text-3xl font-bold mb-6">Manage Categories</h1>
 
       <form onSubmit={handleSubmit} className="mb-6 space-y-4">
@@ -124,9 +130,9 @@ export default function CategoryPage() {
 
       {!loading && !error && (
         <>
-          {(!Array.isArray(categories) || categories.length === 0) && (
+          {/* {(!Array.isArray(categories) || categories.length === 0) && (
             <p>No categories found.</p>
-          )}
+          )} */}
           {Array.isArray(categories) && categories.length > 0 && (
             <ul className="space-y-4">
               {categories.map((category) => (
