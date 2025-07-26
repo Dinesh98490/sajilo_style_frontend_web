@@ -41,7 +41,7 @@ export const useGetCategoryById = (id) => {
   });
 };
 
-// Hook to create a category
+// create a hook category
 export const useCreateCategory = () => {
   const queryClient = useQueryClient();
   return useMutation({
