@@ -9,7 +9,7 @@ import {
     useDeleteCartService ,
 } from "../services/cartService";
 
-// 🔹 get carts
+// get carts
 export const useGetCarts = (data) => {
   return useQuery({
     queryKey: ["carts"],
