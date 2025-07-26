@@ -7,7 +7,7 @@ import {
   deletePaymentService,
 } from "../services/paymentService";
 
-// --- Query Hooks (Read operations) ---
+// review the code of the  payments ---
 
 /**
  * Hook to fetch all payments.
