@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 export default function AdminAuthenticationSettings() {
-  // Authentication Method Settings
+  
   const [passwordLoginEnabled, setPasswordLoginEnabled] = useState(true);
   const [googleSsoEnabled, setGoogleSsoEnabled] = useState(false);
   const [microsoftSsoEnabled, setMicrosoftSsoEnabled] = useState(false);
