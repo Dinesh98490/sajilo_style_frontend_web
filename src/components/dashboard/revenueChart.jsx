@@ -8,6 +8,8 @@ import {
 import { Badge } from '../landingpagecomponents/herosection/ui/badge';
 
 function RevenueChart() {
+
+  // review the code of the revenue chart
   const revenueData = [
     { month: "Jan", value: 65 },
     { month: "Feb", value: 85 },
