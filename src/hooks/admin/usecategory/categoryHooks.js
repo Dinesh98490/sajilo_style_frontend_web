@@ -63,7 +63,7 @@ export const useUpdateCategory = () => {
   });
 };
 
-// Hook to delete a category
+// hook to delete category
 export const useDeleteCategory = () => {
   const queryClient = useQueryClient();
   return useMutation({

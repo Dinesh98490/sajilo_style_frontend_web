@@ -27,7 +27,7 @@ export const useGetCategoryByIdService = (id) => {
   });
 };
 
-// Create
+// Create a category service
 export const useCreateCategoryService =  async (formData) => {
     try {
         const res = await createCategoryApi(formData);
