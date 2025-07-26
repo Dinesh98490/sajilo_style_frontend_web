@@ -2,6 +2,8 @@ import React from "react";
 import { Eye, ShoppingBag, DollarSign, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "../landingpagecomponents/herosection/ui/card";
 
+
+// statscards
 function StatsCards() {
   const statsData = [
     {
