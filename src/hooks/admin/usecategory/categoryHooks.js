@@ -52,7 +52,7 @@ export const useCreateCategory = () => {
   });
 };
 
-// Hook to update a category
+// hook to update the category
 export const useUpdateCategory = () => {
   const queryClient = useQueryClient();
   return useMutation({
