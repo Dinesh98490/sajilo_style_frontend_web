@@ -77,6 +77,7 @@ export function FormActions({ isLoading }) {
         transition={{ duration: 0.5, delay: 0.8 }}
       >
         <button
+        type="button"
           onClick={handleForgotPassword}
           className="text-orange-500 text-sm font-medium hover:text-orange-600 transition-colors duration-300"
         >
@@ -107,6 +108,7 @@ export function FormActions({ isLoading }) {
         <p className="text-gray-600 text-sm">
           {"Don't have an account yet? "}
           <button
+          type="button"
             onClick={handleRegister}
             className="text-orange-500 font-medium hover:text-orange-600 transition-colors duration-300"
           >
